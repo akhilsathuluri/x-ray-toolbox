@@ -42,7 +42,7 @@ For resources have a look at the paper, [Computing solution spaces for robust de
 
 
 # Release history
-This is a new stable release of the v0.0.3a. There are several new features included in this version as listed below.
+This is a new stable release of the v0.0.3a. There are several new features included in this. A detailed list can be seen in `releases` tab
  <!-- X-Ray tool now uses streamlit-1.3.0. The last stable release done on 29-12-2021 -->
 <!-- ### Release v0.0.3a: -->
 <!-- ### New in v0.0.3a:\n
