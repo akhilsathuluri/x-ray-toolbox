@@ -10,7 +10,7 @@
 <!-- * Or for minimal installation time use `pip install streamlit, plotly, graphviz,` -->
 <!-- * Wait for it to install and your tool is ready to go! -->
 
-## Setting up your problem in the tool
+## Setting up your problem
 
 * To setup a new problem go to: `xray-main/src/problems`
 * All problems follow similar template as the `Line` problem given as an example, so you can copy paste its directory to get started
@@ -26,7 +26,7 @@
 * You can define problem description and problem name
 * Also setup the plotter array to plot variables required (starting from first variable as 0), for example if you want plots for variables 1 and 2 add \[0, 1\] in the array plotter.
 
-## Running the your problem in the X-Ray toolbox
+## Running the your problem
 
 * Once you setup your problem, load it by typing `streamlit run main.py` in the Anaconda prompt being in the `xray/src` directory
 * You can find help by clicking the `+ Getting started` button in the center
@@ -42,9 +42,10 @@ For resources have a look at the paper, [Computing solution spaces for robust de
 
 
 # Release history
-This is a new stable release of the v0.0.3a. There are several new features included in this version as listed below. X-Ray tool now uses streamlit-1.3.0. The last stable release done on 29-12-2021
-### Release v0.0.3a:
-## New in v0.0.3a:\n
+This is a new stable release of the v0.0.3a. There are several new features included in this version as listed below.
+ <!-- X-Ray tool now uses streamlit-1.3.0. The last stable release done on 29-12-2021 -->
+<!-- ### Release v0.0.3a: -->
+<!-- ### New in v0.0.3a:\n
 1. Modularised code for ease of understanding and usage
 2. The most awaited "Update" button for the DV and QoI sliders
 3. Add images like ADGs or system diagrams by dragging and dropping them into the tool
@@ -55,7 +56,7 @@ This is a new stable release of the v0.0.3a. There are several new features incl
 8. Two examples: Line and Crash Design are included as templates for setting up problems.
 Users are encouraged to use the template Line from the current version to set up new problems.
 9. A black square now highlights the nominal design
-10. Progress update tracker of joblib in terminal using tqdm
+10. Progress update tracker of joblib in terminal using tqdm -->
 
 <!-- ### Release v0.0.2a:
 1. Integrated graphviz for ADG generation
