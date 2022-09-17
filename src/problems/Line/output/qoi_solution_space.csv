@@ -1,0 +1,3 @@
+Variables,Lower,Upper,Units,Description
+L1,-50.0,50.0,m,line x-y
+L2,-50.0,50.0,m,line y-z

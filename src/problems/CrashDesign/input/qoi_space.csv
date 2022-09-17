@@ -1,0 +1,4 @@
+Variables,Lower,Upper,Units,Description
+E_rem,-10000000000,0,J,Remaining energy after the crash is violated
+a_max,0,320,m,Maximal negative acceleration occuring while the crash is violated
+order,-10000000000,0,,Order of the deformation of sector one and two is violated
