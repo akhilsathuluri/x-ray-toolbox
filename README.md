@@ -7,20 +7,18 @@ X-Ray toolbox
 [![Github issues](https://img.shields.io/github/issues/akhilsathuluri/x-ray-tool)](https://github.com/akhilsathuluri/x-ray-tool)
 
 
-X-Ray toolbox is a Python toolbox to break down system level requirements of a multi-component system to individual component level requirements. The library is developed and maintained by the [Robot Systms Group, Laboratory for Product Development and Lightweight Design, TU Munich](https://www.mec.ed.tum.de/en/lpl/research/research-groups/robot-systems/). It allows user to understand and interpret the trade-offs made during the design phase of system with several interdependant sub-systems. 
+X-Ray toolbox is written in Python and allows users to break down system level requirements of a multi-component system to individual component level requirements. The library is developed and maintained by the [Robot Systms Group, Laboratory for Product Development and Lightweight Design, TU Munich](https://www.mec.ed.tum.de/en/lpl/research/research-groups/robot-systems/). It allows users to understand and interpret the trade-offs while designing a system with several interdependant sub-systems. 
 
-To dive more into the theory have a look at the paper, [Computing solution spaces for robust design](https://github.com/PhD-TUM/xray-python/files/7787066/file.pdf). 
+To dive more into the theory have a look at the paper, [Computing solution spaces for robust design](https://github.com/PhD-TUM/xray-python/files/7787066/file.pdf) and [On the design of large systems subject to uncertainty](https://www.tandfonline.com/doi/abs/10.1080/09544828.2017.1303664). 
 
+
+## Requirements
+The following are required to use the library:
+* Tested on Ubuntu 20.04 with Python 3.8
+* Dependancies can be installed using the `requirements.txt` file
 
 ## Installation
-
-* Click on the download button on the right top in the repository page and download a .zip file of the tool or download the latest release or clone the repo
-* Then download and install Anaconda individual edition as given here: <https://www.anaconda.com/products/individual>
-* One the installation is done, open installed Ananconda prompt
-* Change directory in the prompt to go to the xray tool directory: `cd <path of the xray tool>`
-* Then install required libraries by typing: `pip install -r requirements.txt`
-<!-- * Or for minimal installation time use `pip install streamlit, plotly, graphviz,` -->
-<!-- * Wait for it to install and your tool is ready to go! -->
+* Download the released version or clone the repository 
 
 ## Usage
 
