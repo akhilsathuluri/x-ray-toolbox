@@ -2,8 +2,8 @@ X-Ray toolbox
 ========
 
 [![Github license](https://img.shields.io/github/license/akhilsathuluri/x-ray-tool)](https://github.com/akhilsathuluri/x-ray-tool)
-[![python](https://img.shields.io/badge/Python-3.8)](https://www.python.org/downloads/)
 [![Github issues](https://img.shields.io/github/issues/akhilsathuluri/x-ray-tool)](https://github.com/akhilsathuluri/x-ray-tool)
+[![python](https://img.shields.io/badge/python-3.8-green)](https://github.com/akhilsathuluri/x-ray-tool)
 
 ## Introduction
 
