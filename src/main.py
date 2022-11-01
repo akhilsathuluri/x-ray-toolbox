@@ -548,7 +548,7 @@ if 'sessionID' and 'prev_sessionID' not in st.session_state:
     st.session_state['prev_sessionID'] = sessionID
     st.session_state.prev_sample_size = xray.sample_size
 
-sessionID = np.random.randint(11, 9999999999)
+sessionID = np.random.randint(11, 99999)
 st.session_state.sessionID = sessionID
 
 # Unique sessionID for debugging
