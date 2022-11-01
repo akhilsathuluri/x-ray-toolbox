@@ -28,27 +28,18 @@ Two examples are provided in [`src\problems`](https://github.com/akhilsathuluri/
 * [`Line`](https://github.com/akhilsathuluri/x-ray-tool/tree/main/src/problems/Line): shows setting up the problem for a dummy system 
 
 ## Usage
-* To setup a new problem go to: `xray-main/src/problems`
-* All problems follow similar template as the `Line` problem given as an example, so you can copy paste its directory to get started
-* Name your problem as the name of the folder (DO NOT USE SPACES IN THE NAME)
-* Go into the folder and setup your design variable and quantities of interest bounds in the input folder in their respective .csv files and do not use mathematical expressions, please define numbers
-* Use simple variable names, preferably a single letter, also give a description for the variable for clarity
-* Similarly, setup bounds on your quantities of interest
-* All quantities of interest and design variables should have an upper and lower bound (if you have one variable or discrete set of bounds please see issues to track progress on that feature)
-* All bottom-up mappings are defined in the `library` directory
-* Change the main file (\`Line.py\`) file to the same name as your directory
-* Also change the class name to your directory name
-* You can use your favorite editor to setup your bottom-up mappings (Like Atom: <https://atom.io/)>
-* You can define problem description and problem name
-* Also setup the plotter array to plot variables required (starting from first variable as 0), for example if you want plots for variables 1 and 2 add \[0, 1\] in the array plotter.
+* The main directory to setup new problems is `xray-main/src/problems`
+* Name the folder same as the problem and define the domain for the design variables and the quantities of interest as done in [`CrashDesign`](https://github.com/akhilsathuluri/x-ray-tool/tree/main/src/problems/CrashDesign)
+* The `bottom-up` mappings are defined in the `library` directory
+* Define the desired design sections as an array in `plotter` within the problem definition
 
-## Setup
-
-* Once you setup your problem, load it by typing `streamlit run main.py` in the Anaconda prompt being in the `xray/src` directory
-* You can find help by clicking the `+ Getting started` button in the center
-* Click on your problem in the dropdown in `Problem Configuration`
-* Define functions for each quantity of interest defined, make sure the name of the function is same as the name of the variable defined in qoi csv
+## Interface
+* The interface is written in [streamlit](https://streamlit.io/) and can be accessed by,
+```
+streamlit run main.py
+```
+* You can find help by in the `+ Getting started` drop down
+* Select problem from the `Problem Configuration` dropdown
 
 ## Help
-* For general help look at the `Help` dropdown within the tool by clicking the `+` on the top of the screen
-* You can also raise an issue directly in GitHub/GitLab or mail me at akhil.sathuluri@tum.de
+For general use the `Help` dropdown within the tool by clicking the `+` on the top or raise an [issue](https://github.com/akhilsathuluri/x-ray-tool/issues) for help
