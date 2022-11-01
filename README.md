@@ -1,4 +1,13 @@
-# X-Ray toolbox
+X-Ray toolbox
+========
+
+[![Github license](https://img.shields.io/github/license/akhilsathuluri/x-ray-tool)](https://github.com/akhilsathuluri/x-ray-tool)
+[![python](https://img.shields.io/badge/Python-3.8)](https://www.python.org/downloads/)
+[![Github issues](https://img.shields.io/github/issues/akhilsathuluri/x-ray-tool)](https://github.com/akhilsathuluri/x-ray-tool)
+
+## Introduction
+
+## What is X-Ray tool
 
 ## Downloading and setting up the python x-ray toolox
 
