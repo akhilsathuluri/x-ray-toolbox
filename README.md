@@ -6,22 +6,28 @@ X-Ray toolbox
 [![Github release](https://img.shields.io/github/release/akhilsathuluri/x-ray-tool)](https://github.com/akhilsathuluri/x-ray-tool/releases)
 [![Github issues](https://img.shields.io/github/issues/akhilsathuluri/x-ray-tool)](https://github.com/akhilsathuluri/x-ray-tool)
 
+![Top down design process](https://github.com/akhilsathuluri/x-ray-tool/blob/main/screenshots/top-down-design.png)
 
 X-Ray toolbox is written in Python and allows users to break down system level requirements of a multi-component system to individual component level requirements. The library is developed and maintained by the [Robot Systms Group, Laboratory for Product Development and Lightweight Design, TU Munich](https://www.mec.ed.tum.de/en/lpl/research/research-groups/robot-systems/). It allows users to understand and interpret the trade-offs while designing a system with several interdependant sub-systems. 
+
+
 
 To dive more into the theory have a look at the paper, [Computing solution spaces for robust design](https://github.com/PhD-TUM/xray-python/files/7787066/file.pdf) and [On the design of large systems subject to uncertainty](https://www.tandfonline.com/doi/abs/10.1080/09544828.2017.1303664). 
 
 
 ## Requirements
-The following are required to use the library:
-* Tested on Ubuntu 20.04 with Python 3.8
-* Dependancies can be installed using the `requirements.txt` file
+The library is tested on Ubuntu 20.04 with Python 3.8
 
 ## Installation
 * Download the released version or clone the repository 
+* Dependancies can be installed using the `requirements.txt` file
+
+## Examples
+Two examples are provided in `[src\problems](https://github.com/akhilsathuluri/x-ray-tool/tree/main/src/problems)` to demonstrate the working of the tool and problem setup. They are:
+* `[CrashDesign](https://github.com/akhilsathuluri/x-ray-tool/tree/main/src/problems/CrashDesign)`: shows decomposing requirements for a car crash problem
+* `[Line](https://github.com/akhilsathuluri/x-ray-tool/tree/main/src/problems/Line)`: shows setting up the problem for a dummy system 
 
 ## Usage
-
 * To setup a new problem go to: `xray-main/src/problems`
 * All problems follow similar template as the `Line` problem given as an example, so you can copy paste its directory to get started
 * Name your problem as the name of the folder (DO NOT USE SPACES IN THE NAME)
