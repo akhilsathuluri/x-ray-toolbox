@@ -9,8 +9,8 @@ X-Ray toolbox
 <!-- ![Top down design process](https://github.com/akhilsathuluri/x-ray-tool/blob/main/screenshots/top-down-design.png) -->
 
 <p float="middle">
-    <img src="https://github.com/akhilsathuluri/x-ray-tool/blob/main/screenshots/top-down-design.png" alt="Top down design process" width="500"/>
-    <img src="https://github.com/akhilsathuluri/x-ray-tool/blob/main/screenshots/decomposing.png" alt="Requirement decomposition" width="300"/>
+    <img src="https://github.com/akhilsathuluri/x-ray-tool/blob/main/screenshots/top-down-design.png" alt="Top down design process" width="525"/>
+    <img src="https://github.com/akhilsathuluri/x-ray-tool/blob/main/screenshots/decomposing.png" alt="Requirement decomposition" width="275"/>
 </p>
 
 X-Ray toolbox is written in Python and allows users to break down the system-level requirements of a multi-component system into individual component-level requirements. This library is developed and maintained by the [Robot Systems Group, Laboratory for Product Development and Lightweight Design, TU Munich](https://www.mec.ed.tum.de/en/lpl/research/research-groups/robot-systems/). It allows users to understand and interpret the trade-offs while designing a system with several interdependent sub-systems. 
