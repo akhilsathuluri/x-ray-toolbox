@@ -10,7 +10,12 @@ X-Ray toolbox
 
 X-Ray toolbox is written in Python and allows users to break down the system-level requirements of a multi-component system into individual component-level requirements. This library is developed and maintained by the [Robot Systems Group, Laboratory for Product Development and Lightweight Design, TU Munich](https://www.mec.ed.tum.de/en/lpl/research/research-groups/robot-systems/). It allows users to understand and interpret the trade-offs while designing a system with several interdependent sub-systems. 
 
-![Requirement decomposition](https://github.com/akhilsathuluri/x-ray-tool/blob/main/screenshots/decomposing.png) ![Solution spaces](https://github.com/akhilsathuluri/x-ray-tool/blob/main/screenshots/sse.jpg)
+<!-- ![Requirement decomposition](https://github.com/akhilsathuluri/x-ray-tool/blob/main/screenshots/decomposing.png) ![Solution spaces](https://github.com/akhilsathuluri/x-ray-tool/blob/main/screenshots/sse.jpg) -->
+
+<p float="middle">
+  <img src="https://github.com/akhilsathuluri/x-ray-tool/blob/main/screenshots/decomposing.png" alt="Requirement decomposition" width="200"/>
+  <img src="https://github.com/akhilsathuluri/x-ray-tool/blob/main/screenshots/sse.jpg" alt="Solution spaces" width="200"/>
+</p>
 
 To dive more into the theory, have a look at the papers [Computing solution spaces for robust design](https://github.com/PhD-TUM/xray-python/files/7787066/file.pdf) and [On the design of large systems subject to uncertainty](https://www.tandfonline.com/doi/abs/10.1080/09544828.2017.1303664). 
 
