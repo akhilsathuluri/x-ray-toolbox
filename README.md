@@ -23,9 +23,9 @@ The library is tested on Ubuntu 20.04 with Python 3.8
 * Dependancies can be installed using the `requirements.txt` file
 
 ## Examples
-Two examples are provided in `[src\problems](https://github.com/akhilsathuluri/x-ray-tool/tree/main/src/problems)` to demonstrate the working of the tool and problem setup. They are:
-* `[CrashDesign](https://github.com/akhilsathuluri/x-ray-tool/tree/main/src/problems/CrashDesign)`: shows decomposing requirements for a car crash problem
-* `[Line](https://github.com/akhilsathuluri/x-ray-tool/tree/main/src/problems/Line)`: shows setting up the problem for a dummy system 
+Two examples are provided in [`src\problems`](https://github.com/akhilsathuluri/x-ray-tool/tree/main/src/problems) to demonstrate the working of the tool and problem setup. They are:
+* [`CrashDesign`](https://github.com/akhilsathuluri/x-ray-tool/tree/main/src/problems/CrashDesign): shows decomposing requirements for a car crash problem
+* [`Line`](https://github.com/akhilsathuluri/x-ray-tool/tree/main/src/problems/Line): shows setting up the problem for a dummy system 
 
 ## Usage
 * To setup a new problem go to: `xray-main/src/problems`
