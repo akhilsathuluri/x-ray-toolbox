@@ -13,8 +13,8 @@ X-Ray toolbox is written in Python and allows users to break down the system-lev
 <!-- ![Requirement decomposition](https://github.com/akhilsathuluri/x-ray-tool/blob/main/screenshots/decomposing.png) ![Solution spaces](https://github.com/akhilsathuluri/x-ray-tool/blob/main/screenshots/sse.jpg) -->
 
 <p float="middle">
-  <img src="https://github.com/akhilsathuluri/x-ray-tool/blob/main/screenshots/decomposing.png" alt="Requirement decomposition" width="350"/>
-  <img src="https://github.com/akhilsathuluri/x-ray-tool/blob/main/screenshots/sse.jpg" alt="Solution spaces" width="450"/>
+  <img src="https://github.com/akhilsathuluri/x-ray-tool/blob/main/screenshots/decomposing.png" alt="Requirement decomposition" width="375"/>
+  <img src="https://github.com/akhilsathuluri/x-ray-tool/blob/main/screenshots/sse.jpg" alt="Solution spaces" width="425"/>
 </p>
 
 To dive more into the theory, have a look at the papers [Computing solution spaces for robust design](https://github.com/PhD-TUM/xray-python/files/7787066/file.pdf) and [On the design of large systems subject to uncertainty](https://www.tandfonline.com/doi/abs/10.1080/09544828.2017.1303664). 
