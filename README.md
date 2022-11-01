@@ -7,7 +7,7 @@ X-Ray toolbox
 [![Github issues](https://img.shields.io/github/issues/akhilsathuluri/x-ray-tool)](https://github.com/akhilsathuluri/x-ray-tool)
 
 
-X-Ray toolbox is a Python toolbox to break down system level requirements of a multi-component system to individual component level requirements. The library is developed and maintained by the ![Robot Systms Group, Laboratory for Product Development and Lightweight Design, TU Munich](https://www.mec.ed.tum.de/en/lpl/research/research-groups/robot-systems/). It allows user to understand and interpret the trade-offs made during the design phase of system with several interdependant sub-systems. 
+X-Ray toolbox is a Python toolbox to break down system level requirements of a multi-component system to individual component level requirements. The library is developed and maintained by the [Robot Systms Group, Laboratory for Product Development and Lightweight Design, TU Munich](https://www.mec.ed.tum.de/en/lpl/research/research-groups/robot-systems/). It allows user to understand and interpret the trade-offs made during the design phase of system with several interdependant sub-systems. 
 
 To dive more into the theory have a look at the paper, [Computing solution spaces for robust design](https://github.com/PhD-TUM/xray-python/files/7787066/file.pdf). 
 
