@@ -61,6 +61,7 @@ Use the `Getting started` dropdown on the top, present within the tool or raise 
 
 ## Citation
 You can see how to use this library for the design of robots [here](https://ieeexplore.ieee.org/abstract/document/10161134)
+
 If you use this library or find the documentation useful for your research, consider citing the work as:
 ```
 @INPROCEEDINGS{10161134,
