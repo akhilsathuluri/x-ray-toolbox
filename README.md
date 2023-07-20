@@ -58,3 +58,18 @@ streamlit run main.py
 
 ## Help
 Use the `Getting started` dropdown on the top, present within the tool or raise an [issue](https://github.com/akhilsathuluri/x-ray-tool/issues) for help
+
+## Citation
+You can see how to use this library for the design of robots [here](https://ieeexplore.ieee.org/abstract/document/10161134)
+If you use this library or find the documentation useful for your research, consider citing the work as:
+```
+@INPROCEEDINGS{10161134,
+  author={Sathuluri, Akhil and Sureshbabu, Anand Vazhapilli and Zimmermann, Markus},
+  booktitle={2023 IEEE International Conference on Robotics and Automation (ICRA)}, 
+  title={Robust co-design of robots via cascaded optimisation}, 
+  year={2023},
+  volume={},
+  number={},
+  pages={11280-11286},
+  doi={10.1109/ICRA48891.2023.10161134}}
+```
