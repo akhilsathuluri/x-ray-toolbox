@@ -9,7 +9,6 @@ class CrashDesign:
 
     def _compute_commons(self, dv_samples):
         self.var = dv_samples
-        pass
 
     def a_max(self):
         self.var['a_max'] = self.var['F_2']/self.var['m']
