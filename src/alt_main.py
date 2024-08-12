@@ -22,16 +22,20 @@ import numpy as np
 import pandas as pd
 import os
 import plotly.graph_objs as go
+from plotly.subplots import make_subplots
 import copy
 from description import *
 from importlib import import_module
 import plotly.io as pio
 import json
 import itertools
+import graphviz
+# from streamlit.script_runner import RerunException
+from utils import *
 import seaborn as sb
 
-# Main class containing the features of the tool
 class XRayTool:
+    # @st.cache(persist=True, suppress_st_warning=True)
     def __init__(self):
         # ############################################################################
         # ######################## Page configuration ################################
@@ -46,7 +50,7 @@ class XRayTool:
         st.sidebar.title(name+version)
 
         # Load instructions of usage
-        info_expander = st.expander('Getting started')
+        info_expander = st.expander('')
         with info_expander:
             st.markdown(help_text)
 
@@ -57,14 +61,14 @@ class XRayTool:
         self.step_disc = 500
         self.sample_size_step = 1
         self.sample_size_min = 1
-
         # Size of each plot
         self.plotsx = 450
         self.plotsy = 280
-
+        # self.plotsx = 5000
+        # self.plotsy = 1000
         # Setting margins of the plots
         self.plot_margin = dict(l=25,r=25,b=0,t=30)
-        self.plot_font = dict(family="Computer Modern", size=12, color="Black")
+        self.plot_font = dict(family="Computer Modern", size=20, color="Black")
 
         ############################################################################
         ######################## Problem dropdown ##################################
@@ -81,13 +85,22 @@ class XRayTool:
             self.sol_sample_size = self.sample_size_min
             # Set sample size
             self.sample_size = problem_config.number_input('Sample size',min_value=self.sample_size_min, step=self.sample_size_step, value = self.sol_sample_size)
-            self.rerun_button = st.sidebar.button('Rerun')
+            # Adding a reset button when problem is changed
+            # self.reset = st.button('Reset')
+            # if self.reset:
+            #     st.legacy_caching.caching.clear_cache()
+            #     raise RerunException(None)
+                # raise RerunException(st.ScriptRequestQueue.RerunData(None))
 
+                # for key in st.session_state.keys():
+                #     del st.session_state[key]
 
         ############################################################################
         ######################## Load problem variables ############################
         ############################################################################
         # Reading initial input variable space from a csv file
+        # @st.cache()
+        # def load_problem(self):
         dv = pd.read_csv(self.problem_path+'/input/dv_space.csv')
         qoi = pd.read_csv(self.problem_path+'/input/qoi_space.csv')
         # Converting the data into float
@@ -137,10 +150,11 @@ class XRayTool:
             self.marker_size = plot_config.slider('Marker size', min_value = 3., max_value = 12., value = 7.5, step = 0.5)
             self.scatter_markers_ok = dict(color='rgba(10,255,10,1)',size=self.marker_size)
 
-            # Generates plot between all DVs
             self.plot_matrix = st.checkbox('Generate variable matrix plots')
             if self.plot_matrix:
-                # Generate only the required plots
+                # Gneerate only the required plots
+                # l1 = range(0, len(self.problem_dv.Variables))
+                # self.plotter = np.array(list(itertools.product(l1, l1)))
                 index_list = list(range(len(self.problem_dv.Variables)))
                 self.plotter = np.array(list(itertools.combinations(index_list,2)))
 
@@ -148,7 +162,8 @@ class XRayTool:
             self.label_dropdown = st.checkbox('Activate label description', value=True)
 
             # Load the button only if there are saved files
-            self.load_sol = st.checkbox('Load solution', value=False)
+            # HANDLE LOAD SOLUTION SOON!!!
+            self.load_sol = st.checkbox('Load solution', value=True)
 
             if self.load_sol:
                 # Check if saved solutions are present
@@ -168,9 +183,12 @@ class XRayTool:
                     st.error('Saved solution not available, please save solution spaces first')
                     st.stop()
 
+            # Within plot_config
+            # Collapse has to be after the sliders are generated, it doesnt make sense otherwise
             ############################################################################
             ######################## Problem probe #####################################
             ############################################################################
+            # Add collapsing to a random desgin too, None is selected befault
             self.collapse_space = plot_config.radio('Collapse design space', ('None', 'Nominal'))
 
     def update_sliders(self):
@@ -181,6 +199,8 @@ class XRayTool:
             ############################################################################
             dv_expander = variable_container.expander('Design variables')
             # Do not reset sliders but use the session state slider values
+            # slider_dv = self.problem_dv.copy()
+            # slider_qoi = self.problem_qoi.copy()
             slider_dv = st.session_state['updated_dv']
             slider_qoi = st.session_state['updated_qoi']
 
@@ -193,11 +213,12 @@ class XRayTool:
 
             if self.collapse_space == 'Nominal':
                 # Set the DVs to be a nominal design
-                temp_state = st.session_state['updated_dv']
-                nominal_dv = (temp_state['Lower'] + temp_state['Upper'])/2
-                # nominal_dv = st.session_state['updated_dv'].mean(axis=1)
+                nominal_dv = st.session_state['updated_dv'].mean(axis=1)
+                # st.session_state['updated_dv'].Lower = nominal_dv - np.array(st.session_state.slider_steps)
+                # st.session_state['updated_dv'].Upper = nominal_dv + np.array(st.session_state.slider_steps)
                 st.session_state['updated_dv'].Lower = nominal_dv
                 st.session_state['updated_dv'].Upper = nominal_dv
+                # st.session_state
                 slider_dv = st.session_state['updated_dv']
 
             with dv_expander:
@@ -222,6 +243,8 @@ class XRayTool:
                 st.session_state['slider_steps'] = slider_steps
 
             submitted = st.form_submit_button("Update")
+            # Now if nothing is changed then use the previous value from the session session_state
+            # However for this to work submit has to be pressed atleast once
 
             if not submitted:
                 return st.session_state['updated_dv'], st.session_state['updated_qoi']
@@ -232,17 +255,27 @@ class XRayTool:
                 # Return the updated bounds
                 return slider_dv, slider_qoi
 
-
-
-    # This way the colors do not change for a given session as the rectangles are manipulated
+    # This way the colors do not chnage for a given session as the rectangles are manipulated
+    # @st.cache(allow_output_mutation=True)
+    @st.cache()
     def generate_colors(self):
         # Generating unique colors for the quantities of interest
         num_colors = len(self.problem_qoi.Variables)
         # Sample nice colors using seaborns built in color pallette
+        # Change the color scheme based on the required mood
         cv = np.array(sb.color_palette(n_colors=num_colors))
+        # print(cv[:,1])
+
+        # If the number is less than 6 then use color chart
+        # cv = color_chart[:num_colors]
+        # if  num_colors > 6:
+        #     cv = np.random.randint(100, 255, size=(len(self.problem_qoi.Variables),3), dtype=np.uint8)
+        # Now making the green component of the colors chosen to be 0
+        # Directly sampling required number of  colors from seaborns color pallette
         cv[:,1] = 0
         return cv
 
+    # @st.cache()
     def initiate_plots(self):
         # Check if plot matrix is selected
         if not self.plot_matrix:
@@ -270,10 +303,19 @@ class XRayTool:
                         xaxis_range = [self.problem_dv.Lower[self.plotter[plot_index][0]], self.problem_dv.Upper[self.plotter[plot_index][0]]],
                         yaxis_range = [self.problem_dv.Lower[self.plotter[plot_index][1]], self.problem_dv.Upper[self.plotter[plot_index][1]]],
 
-                        # Add title names from the provided DV sheet
-                        xaxis_title = dict(text="{}".format(self.problem_dv.Variables[self.plotter[plot_index][0]]), font_size=15),
-                        yaxis_title = dict(text="{}".format(self.problem_dv.Variables[self.plotter[plot_index][1]]), font_size=15),
-
+                        # xaxis_title=self.problem_dv.Variables[self.plotter[plot_index][0]],
+                        # xaxis_title = dict(text="{}".format(self.problem_dv.Variables[self.plotter[plot_index][0]]), font_size=30),
+                        # yaxis_title = dict(text="{}".format(self.problem_dv.Variables[self.plotter[plot_index][1]]), font_size=30),
+                        xaxis_title = dict(text='K<sub>p</sub>', font_size=28),
+                        # yaxis_title = dict(text='&mu;g/m<sup>2</sup>', font_size=28),
+                        # sqrt: Nm/&#8730;W
+                        # omega: &#969
+                        yaxis_title = dict(text='K<sub>d</sub>', font_size=28),
+                        # xaxis_title = dict(text="m", font_size=30),
+                        # yaxis_title = dict(text="τ", font_size=30),
+                        # yaxis_title=self.problem_dv.Variables[self.plotter[plot_index][1]],
+                        # xaxis_title=r'$\sqrt{(n_\text{c}(t|{T_\text{early}}))}$',
+                        # yaxis_title=r'$d, r \text{ (solar radius)}$',
                         font=self.plot_font,
                         legend=dict(
                             orientation="h",
@@ -282,19 +324,31 @@ class XRayTool:
                             xanchor="center",
                             x=0.5,
                             font = dict(size = 15),
+                            # markerscale=0.5,
                         ),
+                        # legend=dict(
+                        #     orientation="h",
+                        #     yanchor="top",
+                        #     # y=-1.5,
+                        #     xanchor="right",
+                        #     x=2.5
+                        # ),
+                        showlegend = False
                     )
 
-            # If one wants to visualise solution spaces in 3D
             if len(self.plotter[plot_index])==3:
                 fig[plot_index].update_layout(scene=dict(
                   xaxis = dict(range=[self.problem_dv.Lower[self.plotter[plot_index][0]], self.problem_dv.Upper[self.plotter[plot_index][0]]]),
                   yaxis = dict(range=[self.problem_dv.Lower[self.plotter[plot_index][1]], self.problem_dv.Upper[self.plotter[plot_index][1]]]),
                   zaxis = dict(range=[self.problem_dv.Lower[self.plotter[plot_index][2]], self.problem_dv.Upper[self.plotter[plot_index][2]]]),),
+                  # width=500, height=500,
+                  # margin=dict(l=65, r=50, b=65, t=90),
+                  # width=1000, height=1000,
+                  # margin=dict(l=65, r=50, b=65, t=90),
+                  # margin=self.plot_margin
                 )
         return fig
 
-    # Draws the initial boxes
     def update_rectangles(self, dv, fig):
         plot_index = 0
         width = 1
@@ -307,6 +361,8 @@ class XRayTool:
                 fillcolor='rgba(0,0,0,0.05)',)
 
                 # Highlight design if collapsed to nominal
+                # Make sure that the lines are not drawn when nominal but sliders are changed
+                # if self.collapse_space == 'Nominal':
                 if self.collapse_space == 'Nominal' or dv.Lower[self.plotter[plot_index][1]] == dv.Upper[self.plotter[plot_index][1]] and \
                                                             dv.Lower[self.plotter[plot_index][0]] == dv.Upper[self.plotter[plot_index][0]]:
                     width = 10
@@ -337,6 +393,8 @@ class XRayTool:
         return fig
 
     def plot_figs(self, fig):
+        # Uncomment for progress bar
+        # my_bar = st.progress(0)
         plot_index = 0
         for plot_row in range(self.plot_rows):
             col = st.columns(self.plot_cols)
@@ -355,16 +413,21 @@ class XRayTool:
                 # Plotting the solution spaces
                 col[plot_col].plotly_chart(fig[plot_index], use_column_width=True)
                 plot_index = plot_index+1
+        # time.sleep(0.1)
+        # my_bar.progress(float(plot_row)/float(self.plot_rows-1))
 
 
     ############################################################################
     ######################## Sample variables ##################################
     ############################################################################
+    # See if sampling and qoi computation can be done together!!!
+    # @st.cache()
     def sample_variables(self, dv):
         dv_samples = pd.DataFrame(np.random.uniform(dv.Lower, dv.Upper, (self.sample_size, self.problem_dv_size)),columns=dv.Variables)
         return dv_samples
 
-    # Evaluate all the methods in the class and are appended to the list
+    # Evaluate all the methods in the class and are appended to the list,
+    # @st.cache()
     def compute_qoi(self, dv_samples):
         # Update prob.var with the evaluated qoi
         self.prob._compute_commons(dv_samples)
@@ -373,10 +436,27 @@ class XRayTool:
             func = getattr(self.prob, method)
             func()
 
+        # st.write(self.prob.var)
+
     ############################################################################
     ######################## Evaluate qoi ######################################
     ############################################################################
     def evaluate(self, dv_samples, plot_index):
+        # Update prob.var with qoi values for given dv_samples
+        # compute qoi only if the dv sliders change
+        # self.prob = st.session_state.prev_prob_state
+        # !!! THIS CONDITION HAS TO BE SHIFTED INTO THE COMPUTE_MAPPINGS ITSELF
+        # session_change = not (st.session_state.sessionID == st.session_state.prev_sessionID)
+        # slider_change = not ((st.session_state.updated_dv.Lower == st.session_state.prev_updated_dv.Lower).all() and (st.session_state.updated_dv.Upper == st.session_state.prev_updated_dv.Upper).all())
+        # sample_size_change = not (st.session_state.prev_sample_size == self.sample_size)
+        # if (session_change == slider_change) or sample_size_change:
+        #     # If we are still in the same session and the sliders havent moved
+        #     self.compute_qoi(dv_samples)
+        #     # Save computed vars per plotindex and reuse them if QoI doesnt change
+        #     self.prob.var.to_csv(self.problem_path+'/output/plot_data_'+str(plot_index)+'.csv')
+        # else:
+        #     self.prob.var = pd.read_csv(self.problem_path+'/output/plot_data_'+str(plot_index)+'.csv')
+
         # Continue with generating the masks
         masks = pd.DataFrame()
         mask_ok = pd.DataFrame(np.ones(self.sample_size), dtype = bool).loc[:,0]
@@ -390,6 +470,7 @@ class XRayTool:
     ############################################################################
     ######################## Plotting ##########################################
     ############################################################################
+    # @st.cache()
     def compute_mappings(self):
         session_change = not (st.session_state.sessionID == st.session_state.prev_sessionID)
         slider_change = not ((st.session_state.updated_dv.Lower == st.session_state.prev_updated_dv.Lower).all() and (st.session_state.updated_dv.Upper == st.session_state.prev_updated_dv.Upper).all())
@@ -412,7 +493,7 @@ class XRayTool:
             self.dv_samples_plot.iloc[:, self.plotter[plot_index][0]] = self.dv_samples_full.iloc[:, self.plotter[plot_index][0]]
             self.dv_samples_plot.iloc[:, self.plotter[plot_index][1]] = self.dv_samples_full.iloc[:, self.plotter[plot_index][1]]
             # Evaluate the functions using these updated samples and obtain the masks
-            if (session_change == slider_change) or sample_size_change or self.rerun_button:
+            if (session_change == slider_change) or sample_size_change:
                 # If there are changes then re-sample and evaluate
                 self.compute_qoi(self.dv_samples_plot)
                 # Save computed vars per plotindex and reuse them if QoI doesnt change
@@ -421,17 +502,21 @@ class XRayTool:
                 # Load the saved data
                 self.prob.var = pd.read_csv(self.problem_path+'/output/plot_data_'+str(plot_index)+'.csv')
                 # Extract the samples and send them for re=masking
+                # print(self.prob.var)
                 self.dv_samples_plot = self.prob.var.iloc[:,:-self.problem_qoi_size]
 
-            # Update samples per plot
+            # Update the samples per plot
             self.dv_samples_per_plot[plot_index] = self.dv_samples_plot
             self.masks[plot_index], self.dv_samples_ok[plot_index] = self.evaluate(self.dv_samples_plot, plot_index)
             st.session_state.prev_updated_dv = st.session_state.updated_dv
+        # st.session_state.masks = masks
+        # st.session_state.dv_samples_ok = dv_samples_ok
         # Print a horizontal line after each evaluation
         term_size = os.get_terminal_size()
         print('-' * term_size.columns)
         return self.masks, self.dv_samples_ok
 
+    # @st.cache()
     def scatter_plots(self, fig):
         # Before plotting run mappings
         self.compute_mappings()
@@ -470,15 +555,18 @@ class XRayTool:
     def overlay_info(self, fig):
         # read the csv file containing all the info
         try:
-            self.overlay_info = pd.read_csv(self.problem_path+'/input/plot_overlay_i.csv')
-            # Remove the first column containing any names
+            # self.overlay_info = pd.read_csv(self.problem_path+'/input/plot_overlay_h.csv')
+            self.overlay_info = pd.read_csv(self.problem_path+'/input/plot_overlay_xstar.csv')
+            # self.overlay_info = self.overlay_info.fillna(0)
+            # remove the motor names
             self.overlay_info = self.overlay_info.iloc[:, 1:]
             # add the traces of a scatter plot with single data point
             plot_index = 0
             for plot in range(len(self.plotter)):
                 if len(self.plotter[plot_index])==2:
-                    # ToDo: very very inefficient fix
-                    # ToDo: Cannot handle homogenous data now
+                    # Check if any are NaNs and set them to the lowest value of the DV
+                    # VERY VERY INEFFICIENT FIX!!!
+                    # CANNOT HANDLE HOMOGENOUS DATA NOW !!!
                     plot_value1 = self.overlay_info.iloc[:, self.plotter[plot_index][0]]
                     plot_value2 = self.overlay_info.iloc[:, self.plotter[plot_index][1]]
                     # So that plot_value1 is a defined variable as a pandas object
@@ -486,7 +574,8 @@ class XRayTool:
                         plot_value1.values[:] = self.problem_dv.Lower[self.plotter[plot_index][0]]
                     if self.overlay_info.iloc[:, self.plotter[plot_index][1]].isnull().any():
                         plot_value2.values[:] = self.problem_dv.Lower[self.plotter[plot_index][1]]
-
+                    # print(plot_value1, plot_value2)
+                    # trace_info = go.Scatter(x = plot_value1, y = plot_value2, mode= 'markers', name = 'Heuristic functions',  marker=dict(symbol = 'circle', color='Blue',size=4))
                     trace_info = go.Scatter(x = plot_value1, y = plot_value2, mode= 'markers', name = 'Co-optimised design',  marker=dict(symbol = 'circle', color='Black',size=18))
                     fig[plot_index].add_trace(trace_info)
 
@@ -494,18 +583,86 @@ class XRayTool:
         except IOError:
             pass
 
-        return fig
+        # When there are more than one plot-overlays
+        # Handle this differently from next time
+        try:
+            # self.overlay_info = pd.read_csv(self.problem_path+'/input/plot_overlay_i.csv')
+            self.overlay_info = pd.read_csv(self.problem_path+'/input/plot_overlay_xp.csv')
+            # self.overlay_info = self.overlay_info.fillna(0)
+            # remove the motor names
+            self.overlay_info = self.overlay_info.iloc[:, 1:]
+            # add the traces of a scatter plot with single data point
+            plot_index = 0
+            for plot in range(len(self.plotter)):
+                if len(self.plotter[plot_index])==2:
+                    # Check if any are NaNs and set them to the lowest value of the DV
+                    # VERY VERY INEFFICIENT FIX!!!
+                    # CANNOT HANDLE HOMOGENOUS DATA NOW !!!
+                    plot_value1 = self.overlay_info.iloc[:, self.plotter[plot_index][0]]
+                    plot_value2 = self.overlay_info.iloc[:, self.plotter[plot_index][1]]
+                    # So that plot_value1 is a defined variable as a pandas object
+                    if self.overlay_info.iloc[:, self.plotter[plot_index][0]].isnull().any():
+                        plot_value1.values[:] = self.problem_dv.Lower[self.plotter[plot_index][0]]
+                    if self.overlay_info.iloc[:, self.plotter[plot_index][1]].isnull().any():
+                        plot_value2.values[:] = self.problem_dv.Lower[self.plotter[plot_index][1]]
+                    # print(plot_value1, plot_value2)
+                    # trace_info = go.Scatter(x = plot_value1, y = plot_value2, mode= 'markers', name = 'Available motors',  marker=dict(symbol = 'x', color='Black',size=12))
+                    trace_info = go.Scatter(x = plot_value1, y = plot_value2, mode= 'markers', name = 'Closest physically feasible design',  marker=dict(symbol = 'triangle-up', color='Black',size=18))
+                    fig[plot_index].add_trace(trace_info)
 
+                plot_index = plot_index+1
+
+        except IOError:
+            pass
+
+        try:
+            # self.overlay_info = pd.read_csv(self.problem_path+'/input/plot_overlay_i.csv')
+            self.overlay_info = pd.read_csv(self.problem_path+'/input/plot_overlay_xm.csv')
+            # self.overlay_info = self.overlay_info.fillna(0)
+            # remove the motor names
+            self.overlay_info = self.overlay_info.iloc[:, 1:]
+            # add the traces of a scatter plot with single data point
+            plot_index = 0
+            for plot in range(len(self.plotter)):
+                if len(self.plotter[plot_index])==2:
+                    # Check if any are NaNs and set them to the lowest value of the DV
+                    # VERY VERY INEFFICIENT FIX!!!
+                    # CANNOT HANDLE HOMOGENOUS DATA NOW !!!
+                    plot_value1 = self.overlay_info.iloc[:, self.plotter[plot_index][0]]
+                    plot_value2 = self.overlay_info.iloc[:, self.plotter[plot_index][1]]
+                    # So that plot_value1 is a defined variable as a pandas object
+                    if self.overlay_info.iloc[:, self.plotter[plot_index][0]].isnull().any():
+                        plot_value1.values[:] = self.problem_dv.Lower[self.plotter[plot_index][0]]
+                    if self.overlay_info.iloc[:, self.plotter[plot_index][1]].isnull().any():
+                        plot_value2.values[:] = self.problem_dv.Lower[self.plotter[plot_index][1]]
+                    # print(plot_value1, plot_value2)
+                    # trace_info = go.Scatter(x = plot_value1, y = plot_value2, mode= 'markers', name = 'Available motors',  marker=dict(symbol = 'x', color='Black',size=12))
+                    trace_info = go.Scatter(x = plot_value1, y = plot_value2, mode= 'markers', name = 'Selected design',  marker=dict(symbol = 'star', color='Black',size=18))
+                    fig[plot_index].add_trace(trace_info)
+
+                plot_index = plot_index+1
+
+        except IOError:
+            pass
+
+        return fig
 
     ############################################################################
     ######################## Export ##########################################
     ############################################################################
     def export_options(self):
         output_path = self.problem_path+'/output/'
+        # To use along with the test_sim routine to test a particular result
+        # SAVING ALL THE SAMPLES DOESNT WORK !!!
+        # self.dv_samples_full.to_csv(output_path+'all_samples.csv', index=False)
+
+        # Cache all of these small utilities
         # To save the generated data and to create an ADG
         export = st.sidebar.expander('Export')
         # Set output path
         with export:
+            # Talk to Jasper for automatic generation of graph of ADGs
+            # generate_adg = export.button('Generate ADG')
             if export.button('Save solution space'):
                 # Saving the solution spaces as csv files
                 st.session_state.updated_dv.to_csv(output_path+'dv_solution_space.csv', index=False)
@@ -521,10 +678,8 @@ class XRayTool:
                 for i in range(len(fig)):
                     pio.write_image(fig[i],output_path+'fig'+str(i)+'.pdf')
 
-            sample_design = export.button('Sample design')
-            # if export.button('Sample design'):
-        if sample_design:
-            st.write(pd.DataFrame(np.random.uniform(st.session_state.updated_dv.Lower, st.session_state.updated_dv.Upper, (1, self.problem_dv_size)),columns=dv.Variables).transpose())
+            if export.button('Sample design'):
+                st.write(pd.DataFrame(np.random.uniform(st.session_state.updated_dv.Lower, st.session_state.updated_dv.Upper, (1, self.problem_dv_size)),columns=dv.Variables).transpose())
 
     def load_assets(self):
         load_assets = st.sidebar.expander('Load assets')
@@ -546,31 +701,27 @@ if 'sessionID' and 'prev_sessionID' not in st.session_state:
     st.session_state['prev_sessionID'] = sessionID
     st.session_state.prev_sample_size = xray.sample_size
 
-sessionID = np.random.randint(11, 99999)
+sessionID = np.random.randint(11, 9999999999)
 st.session_state.sessionID = sessionID
 
-# Unique sessionID for debugging
-# st.write(st.session_state.sessionID, st.session_state.prev_sessionID)
+st.write(st.session_state.sessionID, st.session_state.prev_sessionID)
 
 # load the sliders
 dv, qoi = xray.update_sliders()
-
 # Initiate plots
 figs = xray.initiate_plots()
-
 # Plot the rectangles based on the sliders
 rect_figs = xray.update_rectangles(dv, figs)
-
 # xray.plot_figs(rect_figs)
 xray.export_options()
 scatter_figs = xray.scatter_plots(rect_figs)
 st.session_state.figs = scatter_figs
-
 # If there are any standard information to plot on the solution spaces add here
 final_figs = xray.overlay_info(scatter_figs)
 xray.plot_figs(final_figs)
 xray.load_assets()
-
+# st.write(xray.dv_samples_slider)
+# st.write(xray.dv_samples_plot)
 # Once one round of plotting is done, update the previous session ID
 st.session_state.prev_sessionID = st.session_state.sessionID
 st.session_state.prev_sample_size = xray.sample_size

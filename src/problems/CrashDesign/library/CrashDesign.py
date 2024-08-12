@@ -5,7 +5,8 @@ class CrashDesign:
         # self.var = dv_samples
         self.problem_name = 'Crash Design'
         self.problem_description = 'Example problem demonstrating the usage of the XRay tool'
-        self.plotter = np.array([[2,0],[0,4],[0,5],[0,1],[2,4],[2,5],[2,1],[4,5],[4,1],[5,1]])
+        # self.plotter = np.array([[2,0],[0,4],[0,5],[0,1],[2,4],[2,5],[2,1],[4,5],[4,1],[5,1]])
+        self.plotter = np.array([[2,0],[0,4]])
 
     def _compute_commons(self, dv_samples):
         self.var = dv_samples
