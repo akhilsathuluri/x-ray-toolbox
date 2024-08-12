@@ -28,7 +28,7 @@ from importlib import import_module
 import plotly.io as pio
 import json
 import itertools
-from utils import *
+# from utils import *
 import seaborn as sb
 
 # Main class containing the features of the tool
@@ -235,7 +235,6 @@ class XRayTool:
 
 
     # This way the colors do not change for a given session as the rectangles are manipulated
-    @st.cache()
     def generate_colors(self):
         # Generating unique colors for the quantities of interest
         num_colors = len(self.problem_qoi.Variables)
@@ -391,7 +390,6 @@ class XRayTool:
     ############################################################################
     ######################## Plotting ##########################################
     ############################################################################
-    # @st.cache()
     def compute_mappings(self):
         session_change = not (st.session_state.sessionID == st.session_state.prev_sessionID)
         slider_change = not ((st.session_state.updated_dv.Lower == st.session_state.prev_updated_dv.Lower).all() and (st.session_state.updated_dv.Upper == st.session_state.prev_updated_dv.Upper).all())

@@ -1,6 +1,7 @@
 import numpy as np
 from joblib import Parallel, delayed
-from utils import *
+# from utils import *
+import tqdm
 
 def _compute_bottom_up_mappings(dv):
     print(dv)
@@ -20,7 +21,8 @@ class Line:
         self.var = dv_samples
         var_list = self.var.values.tolist()
 
-        with tqdm_joblib(tqdm(total=len(var_list))) as progress_bar:
+        # with tqdm_joblib(tqdm(total=len(var_list))) as progress_bar:
+        with (tqdm(total=len(var_list))) as progress_bar:
             self.results = Parallel(n_jobs=-1,backend='loky')(delayed(_compute_bottom_up_mappings)(var_list[i]) for i in range(len(var_list)))
         self.results_array = np.array(self.results)
         pass
