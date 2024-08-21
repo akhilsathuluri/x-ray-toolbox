@@ -1,0 +1,2 @@
+Variables,Lower,Upper,Units,Description
+accuracy,0.0,0.012,m,error between realised and required position accuracy
