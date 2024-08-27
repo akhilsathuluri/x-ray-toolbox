@@ -22,8 +22,7 @@ import numpy as np
 import pandas as pd
 import os
 import plotly.graph_objs as go
-import copy
-from description import *
+from src.description import *
 from importlib import import_module
 import plotly.io as pio
 import json
@@ -31,7 +30,7 @@ import itertools
 import seaborn as sb
 
 # Main class containing the features of the tool
-class XRayTool:
+class XRayViz:
     def __init__(self):
         # ############################################################################
         # ######################## Page configuration ################################
@@ -534,43 +533,3 @@ class XRayTool:
 
         if uploaded_file is not None:
             st.image(uploaded_file)
-
-# Initialise the tool class
-xray = XRayTool()
-# Generate a unique ID for one run of the tool
-# We can use the sessionID to decide if we want to
-# rerun the simulations or not
-sessionID = -1
-if 'sessionID' and 'prev_sessionID' not in st.session_state:
-    st.session_state['sessionID'] = sessionID
-    st.session_state['prev_sessionID'] = sessionID
-    st.session_state.prev_sample_size = xray.sample_size
-
-sessionID = np.random.randint(11, 99999)
-st.session_state.sessionID = sessionID
-
-# Unique sessionID for debugging
-# st.write(st.session_state.sessionID, st.session_state.prev_sessionID)
-
-# load the sliders
-dv, qoi = xray.update_sliders()
-
-# Initiate plots
-figs = xray.initiate_plots()
-
-# Plot the rectangles based on the sliders
-rect_figs = xray.update_rectangles(dv, figs)
-
-# xray.plot_figs(rect_figs)
-xray.export_options()
-scatter_figs = xray.scatter_plots(rect_figs)
-st.session_state.figs = scatter_figs
-
-# If there are any standard information to plot on the solution spaces add here
-final_figs = xray.overlay_info(scatter_figs)
-xray.plot_figs(final_figs)
-xray.load_assets()
-
-# Once one round of plotting is done, update the previous session ID
-st.session_state.prev_sessionID = st.session_state.sessionID
-st.session_state.prev_sample_size = xray.sample_size
