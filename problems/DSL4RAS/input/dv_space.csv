@@ -7,5 +7,7 @@ P_n,100,1000,W,motor power
 N,50,200,-,gear ratio
 eta_t,0.25,1,-,transmission efficiency
 phi_b,0,20,arcmin,gearbox backlash
+l1,0.01,1,m,link length
+l2,0.01,1,m,link lrngth
 kp,1,200,-,proportional gain
 kd,1,100,-,derivative gain

@@ -4,7 +4,7 @@ import sys
 from joblib import Parallel, delayed
 
 sys.path.append("/home/wslaniakea/git/research/py-dsl4ras-sim-models")
-from SCARA_example import get_accuracy_value
+from SCARA_bottom_up_mappings import ScaraSystem
 
 
 class DSL4RAS:
@@ -19,14 +19,28 @@ class DSL4RAS:
                 [5, 1],
             ]
         )
+        self.system = ScaraSystem()
+        self.system.meshcat_visualisation = False
 
     def _compute_commons(self, dv_samples):
         self.var = dv_samples
         var_list = self.var.values.tolist()
 
-        self.accuracy_values = Parallel(n_jobs=-1)(
-            delayed(get_accuracy_value)(var) for var in var_list
+        self.qoi_values = np.array(
+            Parallel(n_jobs=-1)(
+                delayed(self.system.evaluate_qois)(var) for var in var_list
+            )
         )
 
     def accuracy(self):
-        self.var["accuracy"] = self.accuracy_values
+        self.var["accuracy"] = self.qoi_values[:, 0]
+
+    def reach(self):
+        self.var["reach"] = self.qoi_values[:, 1]
+
+    def weight(self):
+        self.var["weight"] = self.qoi_values[:, 2]
+
+    def stabilisation_time(self):
+        self.var["stabilisation_time"] = self.qoi_values[:, 3]
+        print(self.var["stabilisation_time"])
