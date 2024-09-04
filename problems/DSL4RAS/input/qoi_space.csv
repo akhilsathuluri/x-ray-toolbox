@@ -1,5 +1,5 @@
 Variables,Lower,Upper,Units,Description
 accuracy,0,0.1,m,error between realised and required position accuracy
-reach,0.55,10,m,max workspace reach
+reach,0.55,2,m,max workspace reach
 weight,0,80,kg,total weight of the robot
-stabilisation_time,0,2,s,time to reach +-0.1mm of final position
+stabilisation_time,0,1,s,time to reach +-0.1mm of final position

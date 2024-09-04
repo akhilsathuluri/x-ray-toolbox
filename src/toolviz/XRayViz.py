@@ -161,7 +161,7 @@ class XRayViz:
                 self.plotter = np.array(list(itertools.combinations(index_list, 2)))
 
             # Remove label dropdown if not necessary
-            self.label_dropdown = st.checkbox("Activate label description", value=True)
+            self.label_dropdown = st.checkbox("Activate label description", value=False)
 
             # Load the button only if there are saved files
             self.load_sol = st.checkbox("Load solution", value=False)
