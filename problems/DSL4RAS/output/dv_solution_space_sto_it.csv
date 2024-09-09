@@ -1,0 +1,13 @@
+Variables,Lower,Upper,Units,Description
+tau_m_n,0.363282456,0.550250627,Nm,nominal torque
+tau_m_max,2.966544829,3.995952276,Nm,maximum torque
+omega_n,734.7885609,942.0639777,rad/s,nominal motor velocity
+eta_m,0.613826844,0.752988947,-,motor efficiency
+P_n,759.8752727,840.9172988,W,motor power
+N,102.1171326,154.160534,-,gear ratio
+eta_t,0.806990725,0.931450158,-,transmission efficiency
+phi_b,5.821507905,11.45742711,arcmin,gearbox backlash
+l1,0.420319644,0.516935826,m,link length
+l2,0.161804542,0.268666189,m,link lrngth
+kp,180.1215372,217.6394229,-,proportional gain
+kd,23.05834465,28.57995997,-,derivative gain

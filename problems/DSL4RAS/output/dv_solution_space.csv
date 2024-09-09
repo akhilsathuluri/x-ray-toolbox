@@ -1,13 +1,13 @@
 Variables,Lower,Upper,Units,Description
-tau_m_n,0.001,1.0,Nm,nominal torque
-tau_m_max,1.0,5.0,Nm,maximum torque
-omega_n,500.0,1500.0,rad/s,nominal motor velocity
-eta_m,0.625,1.0,-,motor efficiency
-P_n,775.0,1000.0,W,motor power
-N,100.1,200.0,-,gear ratio
-eta_t,0.796,1.0,-,transmission efficiency
-phi_b,0.0,10.0,arcmin,gearbox backlash
-l1,0.297,0.41,m,link length
-l2,0.234,0.401,m,link lrngth
-kp,155.6,218.4,-,proportional gain
-kd,21.4,27.64,-,derivative gain
+tau_m_n,0.660416906,0.946957265,Nm,nominal torque
+tau_m_max,1.750716223,2.783903903,Nm,maximum torque
+omega_n,851.4057533,1176.624635,rad/s,nominal motor velocity
+eta_m,0.735215584,0.940878679,-,motor efficiency
+P_n,627.3910089,731.6864904,W,motor power
+N,123.9867452,170.8271819,-,gear ratio
+eta_t,0.78884208,0.950329683,-,transmission efficiency
+phi_b,5.214941306,12.16928975,arcmin,gearbox backlash
+l1,0.349751317,0.44480176,m,link length
+l2,0.210311625,0.326166018,m,link lrngth
+kp,118.5898257,156.1664729,-,proportional gain
+kd,17.66237448,22.7484354,-,derivative gain
