@@ -522,14 +522,14 @@ class XRayViz:
                 < float(
                     st.session_state.updated_qoi.Upper.loc[
                         st.session_state.updated_qoi.Variables == self.prob.eval_list[i]
-                    ]
+                    ].iloc[0]
                 )
             ) & (
                 self.prob.var[self.prob.eval_list[i]]
                 > float(
                     st.session_state.updated_qoi.Lower.loc[
                         st.session_state.updated_qoi.Variables == self.prob.eval_list[i]
-                    ]
+                    ].iloc[0]
                 )
             )
             mask_ok = np.logical_and(mask_ok, masks[self.prob.eval_list[i]])
@@ -775,6 +775,7 @@ class XRayViz:
             if export.button("Save plots"):
                 fig = st.session_state.figs
                 for i in range(len(fig)):
+                    fig[i].update_layout(width=800, height=600)
                     pio.write_image(fig[i], output_path + "fig" + str(i) + ".pdf")
 
             sample_design = export.button("Sample design")
