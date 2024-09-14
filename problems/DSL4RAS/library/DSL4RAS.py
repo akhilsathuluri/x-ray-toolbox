@@ -11,15 +11,10 @@ class DSL4RAS:
     def __init__(self):
         self.problem_name = "DSL4RAS"
         self.problem_description = "SCARA robot example for a pick and place problem"
-        # self.plotter = np.array(
-        #     [
-        #         [2, 0],
-        #         [0, 4],
-        #         [0, 5],
-        #         [5, 1],
-        #     ]
-        # )
-        self.plotter = np.array([[ii, ii + 1] for ii in range(12 - 1)])
+        self.plotter = np.array(
+            [[6, 8], [5, 9], [7, 5], [3, 7], [2, 9], [6, 2], [0, 5], [1, 8], [10, 11]]
+        )
+        # self.plotter = np.array([[ii, ii + 1] for ii in range(12 - 1)])
         self.system = ScaraSystem()
         self.system.meshcat_visualisation = False
 
