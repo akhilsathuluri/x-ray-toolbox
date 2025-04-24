@@ -94,11 +94,11 @@ class XRayViz:
         ######################## Load problem variables ############################
         ############################################################################
         # Reading initial input variable space from a csv file
-        dv = pd.read_csv(self.problem_path + "/input/dv_space.csv")
-        qoi = pd.read_csv(self.problem_path + "/input/qoi_space.csv")
+        dv = pd.read_csv(self.problem_path + "/input/dv_space.csv", dtype=str)
+        qoi = pd.read_csv(self.problem_path + "/input/qoi_space.csv", dtype=str)
         # Converting the data into float
-        dv.iloc[:, 1:3] = dv.iloc[:, 1:3].astype("float")
-        qoi.iloc[:, 1:3] = qoi.iloc[:, 1:3].astype("float")
+        dv.iloc[:, 1:3] = dv.iloc[:, 1:3].astype(np.float64)
+        qoi.iloc[:, 1:3] = qoi.iloc[:, 1:3].astype(np.float64)
         # Setup constants
         dv_size = dv.shape[0]
         qoi_size = qoi.shape[0]
@@ -238,11 +238,11 @@ class XRayViz:
                     (slider_dv.loc[i, "Lower"], slider_dv.loc[i, "Upper"]) = (
                         dv_expander.slider(
                             self.problem_dv.Variables[i],
-                            min_value=self.problem_dv.Lower[i].item(),
-                            max_value=self.problem_dv.Upper[i].item(),
+                            min_value=self.problem_dv.Lower[i],
+                            max_value=self.problem_dv.Upper[i],
                             value=(
-                                float(slider_dv.Lower[i].item()),
-                                float(slider_dv.Upper[i].item()),
+                                slider_dv.Lower[i],
+                                slider_dv.Upper[i],
                             ),
                             step=slider_step,
                             key="dv_slider" + str(i),
@@ -256,11 +256,11 @@ class XRayViz:
                     (slider_qoi.loc[i, "Lower"], slider_qoi.loc[i, "Upper"]) = (
                         qoi_expander.slider(
                             self.problem_qoi.Variables[i],
-                            min_value=self.problem_qoi.Lower[i].item(),
-                            max_value=self.problem_qoi.Upper[i].item(),
+                            min_value=self.problem_qoi.Lower[i],
+                            max_value=self.problem_qoi.Upper[i],
                             value=(
-                                float(slider_qoi.Lower[i].item()),
-                                float(slider_qoi.Upper[i].item()),
+                                slider_qoi.Lower[i],
+                                slider_qoi.Upper[i],
                             ),
                             step=(self.problem_qoi.Upper[i] - self.problem_qoi.Lower[i])
                             / self.step_disc,

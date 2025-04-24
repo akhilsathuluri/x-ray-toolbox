@@ -1,0 +1,17 @@
+[workspace]
+authors = ["asathuluri <akhil.sathuluri@tum.de>"]
+channels = ["conda-forge"]
+name = "x-ray-toolbox"
+platforms = ["linux-64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+python = "3.12.*"
+streamlit = ">=1.44.1,<2"
+pandas = ">=2.2.3,<3"
+plotly = ">=6.0.1,<7"
+numpy = ">=2.2.5,<3"
+seaborn = ">=0.13.2,<0.14"
+ipykernel = ">=6.29.5,<7"
