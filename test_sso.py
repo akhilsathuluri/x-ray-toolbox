@@ -1,0 +1,381 @@
+# %% Example SSO problem for CrashDesign
+
+import numpy as np
+from problems.CrashDesign.library.CrashDesign import CrashDesign
+import pandas as pd
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+
+seed = 42
+rng = np.random.default_rng(seed)
+
+dv = pd.read_csv("problems/CrashDesign/input/dv_space.csv", dtype=str)
+qoi = pd.read_csv("problems/CrashDesign/input/qoi_space.csv", dtype=str)
+
+dv.iloc[:, 1:3] = dv.iloc[:, 1:3].astype(np.float64)
+qoi.iloc[:, 1:3] = qoi.iloc[:, 1:3].astype(np.float64)
+
+dv_size = dv.shape[0]
+qoi_size = qoi.shape[0]
+
+# %% Evaluate the computed samples
+
+problem = CrashDesign()
+
+
+# %% Now we have the DVs and the QoIs and an easy way to compute them
+"""
+Implement the SSO
+
+Steps:
+Accept an initial guess for the upper and lower bounds of the DVs
+The implementation has two phases: Exploration and Consolidation
+
+Phase 1: Exploration
+- Set a value for the growth rate
+
+
+"""
+#  Implementation of Phase-1: Exploration
+
+is_done = False
+min_growth_rate = 1e-3
+max_growth_rate = 0.2
+growth_rate = 0.1
+max_exploration_iterations = max_consolidation_iterations = 20
+ii_exploration = 0
+use_adaptive_growth_rate = False
+min_purity = 1e-3
+max_purity = 0.999
+slack = 0.0
+apply_leanness = True
+sample_size = 100
+
+
+def box_measure_volume(dv_box, fraction_useful=1.0):
+    # TODO: Check the size of the DVs and check the size of the design box
+    if dv_box.shape[1] != 2:
+        raise ValueError(
+            "DV box must have exactly two columns for upper and lower bounds."
+        )
+    volume = np.prod(dv_box[:, 1] - dv_box[:, 0]) * fraction_useful
+    return volume
+
+
+def dv_box_grow_fixed(dv_box, dv_l, dv_u, growth_rate):
+    dv_box_grown = dv_box + growth_rate * (dv_u - dv_l).reshape(-1, 1) * np.array(
+        [-1, 1]
+    )
+    dv_box_grown[:, 0] = np.clip(dv_box_grown[:, 0], dv_l, dv_u)
+    dv_box_grown[:, 1] = np.clip(dv_box_grown[:, 1], dv_l, dv_u)
+    return dv_box_grown
+
+
+def compute_qoi_violation(qoi_evaluated, qoi_l, qoi_u):
+    # TODO: Assert lb==ub shape
+    qoi_violation = np.zeros_like(qoi_evaluated)
+    normalisation_factor = 1.0
+    qoi_violation_l = (qoi_l - qoi_evaluated) / normalisation_factor
+    qoi_violation_u = (qoi_evaluated - qoi_u) / normalisation_factor
+    qoi_violation = np.maximum(qoi_violation_l, qoi_violation_u)
+    return qoi_violation
+
+
+def compute_qoi_violation_score(qoi_violation):
+    max_violation = np.max(qoi_violation, axis=1)
+    score = np.zeros_like(max_violation)
+    feasible_mask = (max_violation < 0).astype(bool)
+    score[feasible_mask] = np.mean(qoi_violation[feasible_mask], axis=1)
+    score[~feasible_mask] = np.linalg.norm(qoi_violation[~feasible_mask], axis=1)
+    return score, feasible_mask
+
+
+def get_trimming_order(qoi_score):
+    positive_indices = np.where(qoi_score > 0)[0]
+    sorted_indices = np.argsort(qoi_score[positive_indices])
+    sorted_order = positive_indices[sorted_indices]
+    trimming_order = np.vstack((sorted_order, np.flip(sorted_order)))
+    return trimming_order
+
+
+def get_trimmed_box(dv_box, box_measure, dv_samples, feasible_mask, trimming_order):
+    if sum(feasible_mask) == len(feasible_mask):
+        logging.debug("All samples are feasible, no need to trim")
+        return dv_box, box_measure
+    else:
+        dv_box_trimmed, measure_trimmed = trim_dv_box(
+            dv_samples, feasible_mask, trimming_order, dv_box
+        )
+        # evaluate the number of dv_samples now outside the box for stats
+    return dv_box_trimmed, measure_trimmed
+
+
+def dvs_in_box(dv_samples, dv_box):
+    dv_in_box_mask = np.all(
+        (dv_samples >= dv_box[:, 0]) & (dv_samples <= dv_box[:, 1]), axis=1
+    )
+    dv_violation_score = np.max(
+        np.maximum(
+            (dv_box[:, 0] - dv_samples),
+            (dv_samples - dv_box[:, 1]),
+        )
+        / (dv_box[:, 1] - dv_box[:, 0]),
+        axis=1,
+    )
+    return dv_in_box_mask, dv_violation_score
+
+
+def trim_dv_box(dv_samples, feasible_mask, trimming_order, dv_box):
+    dv_box_trimmed = dv_box.copy()
+    box_measure_trimmed = -np.inf
+    dv_box_init = dv_box.copy()
+    # dvs_in_box_mask_init, _ = dvs_in_box(dv_samples, dv_box)
+    for ii in range(trimming_order.shape[0]):
+        dv_box_current = dv_box_init.copy()
+        for jj in range(trimming_order.shape[1]):
+            trim_idx = trimming_order[ii, jj]
+            dv_box_best = []
+            box_measure_best = -np.inf
+            for kk in range(dv_box.shape[0]):
+                for ll in [0, 1]:
+                    dv_box = dv_box_current.copy()
+                    closest_viable = []
+                    if slack < 1:
+                        dvs_in_box_mask, _ = dvs_in_box(dv_samples, dv_box)
+                        if ll == 0:
+                            remain_region = (
+                                dv_samples[:, kk] >= dv_samples[trim_idx, kk]
+                            )
+                            viables = dv_samples[
+                                np.logical_and(
+                                    np.logical_and(remain_region, dvs_in_box_mask),
+                                    feasible_mask,
+                                ),
+                                kk,
+                            ]
+                            if len(viables) > 0:
+                                closest_viable = np.min(viables)
+                            else:
+                                closest_viable = dv_samples[trim_idx, kk]
+                        else:
+                            remain_region = (
+                                dv_samples[:, kk] <= dv_samples[trim_idx, kk]
+                            )
+                            viables = dv_samples[
+                                np.logical_and(
+                                    np.logical_and(remain_region, dvs_in_box_mask),
+                                    feasible_mask,
+                                ),
+                                kk,
+                            ]
+                            if len(viables) > 0:
+                                closest_viable = np.max(viables)
+                            else:
+                                closest_viable = dv_samples[trim_idx, kk]
+
+                    dv_box[kk, ll] = dv_samples[
+                        trim_idx, kk
+                    ] * slack + closest_viable * (1 - slack)
+                    dvs_in_box_mask, _ = dvs_in_box(dv_samples, dv_box)
+                    dvs_in_box_and_feasible = np.logical_and(
+                        dvs_in_box_mask, feasible_mask
+                    )
+                    fraction_useful = sum(dvs_in_box_and_feasible) / len(
+                        dvs_in_box_mask
+                    )
+                    box_measure = box_measure_volume(
+                        dv_box, fraction_useful=fraction_useful
+                    )
+                    if box_measure > box_measure_best:
+                        dv_box_best = dv_box.copy()
+                        box_measure_best = box_measure.copy()
+                    # breakpoint()
+            dv_box_current = dv_box_best
+
+        dvs_in_box_mask, _ = dvs_in_box(dv_samples, dv_box_current)
+        dvs_in_box_and_feasible = np.logical_and(dvs_in_box_mask, feasible_mask)
+        fraction_useful = sum(dvs_in_box_and_feasible) / len(dvs_in_box_mask)
+        box_measure = box_measure_volume(
+            dv_box_current, fraction_useful=fraction_useful
+        )
+        if box_measure > box_measure_trimmed:
+            dv_box_trimmed = dv_box_current
+            box_measure_trimmed = box_measure
+
+    return dv_box_trimmed, box_measure_trimmed
+
+
+# Initial guess for the design box
+# dv_box = np.column_stack(
+#     [((dv.Upper + dv.Lower) / 2).to_numpy().astype(np.float64)] * 2
+# )
+dv_box_init = np.column_stack([[4.05e5, 2e3, 4.05e5, 15.6, 0.3, 0.3]] * 2)
+box_measure_init = box_measure_volume(dv_box_init)
+# dv_box_grown = dv_box_grow_fixed(
+#     dv_box_init,
+#     dv.Lower.to_numpy().astype(np.float64),
+#     dv.Upper.to_numpy().astype(np.float64),
+#     growth_rate=growth_rate,
+# )
+# dv_samples = pd.DataFrame(
+#     rng.uniform(dv_box_grown[:, 0], dv_box_grown[:, 1], size=(sample_size, dv_size)),
+#     columns=dv.Variables,
+# )
+# qoi_violation = compute_qoi_violation(
+#     problem.var[qoi.Variables].to_numpy().astype(np.float64),
+#     qoi.Lower.to_numpy().astype(np.float64),
+#     qoi.Upper.to_numpy().astype(np.float64),
+# )
+# qoi_score, feasible_mask = compute_qoi_violation_score(qoi_violation)
+# trimming_order = get_trimming_order(qoi_score)
+# dv_box_trimmed, box_measure_trimmed = get_trimmed_box(
+#     dv_box_grown,
+#     box_measure,
+#     dv_samples[dv.Variables].to_numpy().astype(np.float64),
+#     feasible_mask,
+#     trimming_order,
+# )
+
+# print("dv_box_trimmed", dv_box_trimmed)
+# print("box_measure_trimmed", box_measure_trimmed)
+logging.debug(f"Initial box measure: {box_measure_init}")
+
+# %%
+box_measure_trimmed = box_measure_init
+dv_box = dv_box_init
+for ii_exploration in range(max_exploration_iterations):
+    # Modification step B - Extend the candidate box
+    if ii_exploration > 1 and use_adaptive_growth_rate:
+        # logging.debug("Adaptive growth rate")
+        # purity = np.clip(purity, min_purity, max_purity)
+        # delta_box_measure = box_measure - prev_box_measure
+        raise NotImplementedError("Adaptive growth rate is not implemented yet")
+        break
+    prev_box_measure = box_measure_trimmed
+    logging.debug(f"Iteration {ii_exploration} - Box measure: {box_measure_trimmed}")
+    logging.debug("Growing candidate box")
+
+    # grow the candidate box
+    dv_box_grown = dv_box_grow_fixed(
+        dv_box,
+        dv.Lower.to_numpy().astype(np.float64),
+        dv.Upper.to_numpy().astype(np.float64),
+        growth_rate=growth_rate,
+    )
+    logging.debug(f"DV box grown: {dv_box_grown}")
+    logging.debug(f"Current growth rate is: {growth_rate}")
+
+    # generate samples within the design box
+    dv_samples = pd.DataFrame(
+        rng.uniform(
+            dv_box_grown[:, 0], dv_box_grown[:, 1], size=(sample_size, dv_size)
+        ),
+        columns=dv.Variables,
+    )
+
+    # evaluate the samples for all the QoIs
+    problem._compute_commons(dv_samples)
+    for method in qoi.Variables:
+        func = getattr(problem, method)
+        func()
+
+    # generate labels and scores
+    qoi_violation = compute_qoi_violation(
+        problem.var[qoi.Variables].to_numpy().astype(np.float64),
+        qoi.Lower.to_numpy().astype(np.float64),
+        qoi.Upper.to_numpy().astype(np.float64),
+    )
+    qoi_score, feasible_mask = compute_qoi_violation_score(qoi_violation)
+    if sum(feasible_mask) == 0:
+        logging.debug("No feasible samples found, relax constraints and retry")
+
+    purity = sum(feasible_mask) / sample_size
+    box_measure_grown = box_measure_volume(
+        dv_box_grown, fraction_useful=sum(feasible_mask) / sample_size
+    )
+    logging.debug(f"Purity: {purity}")
+
+    if sum(feasible_mask) == 0 or purity < min_purity:
+        logging.debug("Purity is below the threshold, reducing growth rate")
+
+    # Modification step A - Remove bad sample designs
+    # get trimming order
+    trimming_order = get_trimming_order(qoi_score)
+    dv_box_trimmed, box_measure_trimmed = get_trimmed_box(
+        dv_box_grown,
+        box_measure_grown,
+        dv_samples[dv.Variables].to_numpy().astype(np.float64),
+        feasible_mask,
+        trimming_order,
+    )
+    logging.debug(f"Box measure after trimming: {box_measure_trimmed}")
+    if apply_leanness:
+        # TODO: Need to add this
+        pass
+
+    dv_box = dv_box_trimmed
+
+    logging.debug(f"DV box trimmed: {dv_box_trimmed}")
+    logging.debug(f"Current box measure: {box_measure_trimmed}")
+logging.debug(f"Exploration phase completed. Box measure: {box_measure_trimmed}")
+
+
+for ii_consolidation in range(max_consolidation_iterations):
+    logging.debug(f"Consolidation iteration {ii_consolidation}")
+    dv_samples = pd.DataFrame(
+        rng.uniform(dv_box[:, 0], dv_box[:, 1], size=(sample_size, dv_size)),
+        columns=dv.Variables,
+    )
+    problem._compute_commons(dv_samples)
+    for method in qoi.Variables:
+        func = getattr(problem, method)
+        func()
+    qoi_violation = compute_qoi_violation(
+        problem.var[qoi.Variables].to_numpy().astype(np.float64),
+        qoi.Lower.to_numpy().astype(np.float64),
+        qoi.Upper.to_numpy().astype(np.float64),
+    )
+    qoi_score, feasible_mask = compute_qoi_violation_score(qoi_violation)
+    if sum(feasible_mask) == 0:
+        logging.debug("No feasible samples found, relax constraints and retry")
+
+    box_measure = box_measure_volume(
+        dv_box, fraction_useful=sum(feasible_mask) / sample_size
+    )
+
+    # Modification step A - Remove bad sample designs
+    trimming_order = get_trimming_order(qoi_score)
+    dv_box_trimmed, box_measure_trimmed = get_trimmed_box(
+        dv_box,
+        box_measure,
+        dv_samples[dv.Variables].to_numpy().astype(np.float64),
+        feasible_mask,
+        trimming_order,
+    )
+    logging.debug(f"Box measure after trimming: {box_measure_trimmed}")
+    if apply_leanness:
+        # TODO: Need to add this
+        pass
+
+dv_box = dv_box_trimmed
+logging.debug(f"Consolidation phase completed. Box measure: {box_measure_trimmed}")
+logging.debug(f"Final DV box: {dv_box}")
+
+# %%
+# Export the final DV box to a CSV file
+dv_solution_space = pd.DataFrame(
+    {
+        "Variables": dv["Variables"],
+        "Lower": dv_box[:, 0],
+        "Upper": dv_box[:, 1],
+        "Units": dv["Units"],
+        "Description": dv["Description"],
+    }
+)
+dv_solution_space.to_csv(
+    "problems/CrashDesign/output/dv_solution_space.csv", index=False
+)
+logging.debug(
+    "Exported DV solution space to problems/CrashDesign/output/dv_solution_space.csv"
+)

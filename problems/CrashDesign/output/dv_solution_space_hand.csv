@@ -1,0 +1,7 @@
+Variables,Lower,Upper,Units,Description
+F_2,440000.0,646000.0,N,Force
+m,1974.0,2500.0,kg,Mass
+F_1,278000.0,452000.0,N,Force 
+v_0,15.0,19.2,m/s,Velocity
+d_1c,0.4332,0.6,m,
+d_2c,0.426,0.6,m,

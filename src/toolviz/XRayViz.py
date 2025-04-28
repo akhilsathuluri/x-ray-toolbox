@@ -53,6 +53,9 @@ class XRayViz:
         # ############################################################################
         # ######################## Defaults setup ####################################
         # ############################################################################
+        # Set problem seed
+        self.seed = 42
+        self.rng = np.random.default_rng(self.seed)
         # Step movement for the design variable sliders
         self.step_disc = 500
         self.sample_size_step = 1
@@ -493,7 +496,7 @@ class XRayViz:
     ############################################################################
     def sample_variables(self, dv):
         dv_samples = pd.DataFrame(
-            np.random.uniform(
+            self.rng.uniform(
                 dv.Lower, dv.Upper, (self.sample_size, self.problem_dv_size)
             ),
             columns=dv.Variables,
@@ -781,7 +784,7 @@ class XRayViz:
             sample_design = export.button("Sample design")
             # if export.button('Sample design'):
         if sample_design:
-            sampled_design = np.random.uniform(
+            sampled_design = self.rng.uniform(
                 st.session_state.updated_dv.Lower,
                 st.session_state.updated_dv.Upper,
                 (1, self.problem_dv_size),
