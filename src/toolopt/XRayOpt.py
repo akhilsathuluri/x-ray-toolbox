@@ -43,10 +43,9 @@ class XRayOpt:
         self.problem_qoi = x_ray_viz_class.problem_qoi
         self.problem_dv_size = x_ray_viz_class.problem_dv_size
         self.problem_qoi_size = x_ray_viz_class.problem_qoi_size
-
         self._extract_problem_data()
 
-    def _setup_problem(self, problem_path, problem_name, problem_class):
+    def _setup_problem(self, problem_path, problem_class):
         self.problem_path = problem_path
         self.prob = problem_class
         dv = pd.read_csv(self.problem_path + "/input/dv_space.csv", dtype=str)
@@ -58,6 +57,10 @@ class XRayOpt:
         self.problem_dv_size = dv.shape[0]
         self.problem_qoi_size = qoi.shape[0]
         self._extract_problem_data()
+
+    def update_qoi_bounds(self, qoi):
+        self.qoi_l = qoi.Lower.to_numpy().astype(np.float64)
+        self.qoi_u = qoi.Upper.to_numpy().astype(np.float64)
 
     def box_measure_volume(self, dv_box, fraction_useful=1.0):
         volume = np.prod(dv_box[:, 1] - dv_box[:, 0]) * fraction_useful

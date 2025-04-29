@@ -23,6 +23,8 @@ from src.description import *
 from src.toolviz.XRayViz import XRayViz
 from src.toolopt.XRayOpt import XRayOpt
 import logging
+import json
+import os
 
 # Initialise the tool class
 xray = XRayViz()
@@ -58,23 +60,27 @@ with run_opt:
         sso.sample_size = 100
         sso._get_problem_info_from_app(xray)
         sso._set_initial_box()
+        sso.update_qoi_bounds(st.session_state["updated_qoi"])
         dv_box, box_measure = sso.run_sso_stochastic_iteration()
-        st.write("Computed measure of the box: ", box_measure)
         dv_sol_space = sso.export_optimisation_result(dv_box)
-        st.success("Optimisation completed successfully. Results exported.")
-        # Add information box about the optimization parameters
-        st.info(
-            f"""
-        **Optimization Algorithm Parameters:**
-        - Growth rate: {sso.growth_rate}
-        - Sample size: {sso.sample_size}
-        - Max exploration iterations: {sso.max_exploration_iterations}
-        - Max consolidation iterations: {sso.max_consolidation_iterations}
-        """
-        )
         st.session_state["updated_dv"] = dv_sol_space
-        st.rerun()
+        result_outpath = xray.problem_path + "/output"
+        os.makedirs(result_outpath, exist_ok=True)
+        plot_data = {
+            "box_measure": float(box_measure),
+            "optimization_params": {
+                "growth_rate": float(sso.growth_rate),
+                "sample_size": int(sso.sample_size),
+                "max_exploration_iterations": int(sso.max_exploration_iterations),
+                "max_consolidation_iterations": int(sso.max_consolidation_iterations),
+            },
+        }
+        with open(xray.problem_path + "/output/optimisation_config.json", "w") as f:
+            json.dump(plot_data, f, indent=4)
 
+        st.success(
+            "Data saved to " + xray.problem_path + "/output/optimisation_config.json"
+        )
 
 xray.export_options()
 scatter_figs = xray.scatter_plots(rect_figs)
