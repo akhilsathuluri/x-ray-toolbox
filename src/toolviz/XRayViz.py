@@ -102,15 +102,12 @@ class XRayViz:
         # Converting the data into float
         dv.iloc[:, 1:3] = dv.iloc[:, 1:3].astype(np.float64)
         qoi.iloc[:, 1:3] = qoi.iloc[:, 1:3].astype(np.float64)
-        # Setup constants
-        dv_size = dv.shape[0]
-        qoi_size = qoi.shape[0]
 
         # Save problem level details that do not change
         self.problem_dv = dv
         self.problem_qoi = qoi
-        self.problem_dv_size = dv_size
-        self.problem_qoi_size = qoi_size
+        self.problem_dv_size = dv.shape[0]
+        self.problem_qoi_size = qoi.shape[0]
 
         # Initiate session state with default values
         if "updated_dv" and "updated_qoi" not in st.session_state:
