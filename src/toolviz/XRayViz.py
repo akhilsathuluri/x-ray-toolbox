@@ -802,3 +802,10 @@ class XRayViz:
 
         if uploaded_file is not None:
             st.image(uploaded_file)
+
+    # def optimisation_options(self):
+    #     run_opt = st.sidebar.expander("Optimisation")
+    #     with run_opt:
+    #         st.write("Runs stochastic iteration optimisation")
+    #         if st.button("Optimise"):
+    #             pass

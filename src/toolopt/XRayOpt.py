@@ -27,24 +27,28 @@ class XRayOpt:
         self.apply_leanness: bool = False
         self.sample_size: int = 100
 
-    def _get_problem_info_from_xray_viz(self, x_ray_viz_class):
-        self.problem_dv = x_ray_viz_class.problem_dv
-        self.problem_qoi = x_ray_viz_class.problem_qoi
-        self.problem_dv_size = x_ray_viz_class.problem_dv_size
-        self.problem_qoi_size = x_ray_viz_class.problem_qoi_size
-        self.prob = x_ray_viz_class.prob
-        self.problem_path = x_ray_viz_class.problem_path
-        self.problem_name = x_ray_viz_class.problem_name
+    def _extract_problem_data(self):
         self.dv_l = self.problem_dv.Lower.to_numpy().astype(np.float64)
         self.dv_u = self.problem_dv.Upper.to_numpy().astype(np.float64)
         self.qoi_l = self.problem_qoi.Lower.to_numpy().astype(np.float64)
         self.qoi_u = self.problem_qoi.Upper.to_numpy().astype(np.float64)
+        self.dv_variables = self.problem_dv.Variables.to_list()
+        self.qoi_variables = self.problem_qoi.Variables.to_list()
+        self.problem_name = self.prob.problem_name
+
+    def _get_problem_info_from_app(self, x_ray_viz_class):
+        self.problem_path = x_ray_viz_class.problem_path
+        self.prob = x_ray_viz_class.prob
+        self.problem_dv = x_ray_viz_class.problem_dv
+        self.problem_qoi = x_ray_viz_class.problem_qoi
+        self.problem_dv_size = x_ray_viz_class.problem_dv_size
+        self.problem_qoi_size = x_ray_viz_class.problem_qoi_size
+
+        self._extract_problem_data()
 
     def _setup_problem(self, problem_path, problem_name, problem_class):
         self.problem_path = problem_path
-        self.problem_name = problem_name
         self.prob = problem_class
-
         dv = pd.read_csv(self.problem_path + "/input/dv_space.csv", dtype=str)
         qoi = pd.read_csv(self.problem_path + "/input/qoi_space.csv", dtype=str)
         dv.iloc[:, 1:3] = dv.iloc[:, 1:3].astype(np.float64)
@@ -53,12 +57,7 @@ class XRayOpt:
         self.problem_qoi = qoi
         self.problem_dv_size = dv.shape[0]
         self.problem_qoi_size = qoi.shape[0]
-        self.dv_l = self.problem_dv.Lower.to_numpy().astype(np.float64)
-        self.dv_u = self.problem_dv.Upper.to_numpy().astype(np.float64)
-        self.qoi_l = self.problem_qoi.Lower.to_numpy().astype(np.float64)
-        self.qoi_u = self.problem_qoi.Upper.to_numpy().astype(np.float64)
-        self.dv_variables = self.problem_dv.Variables.to_list()
-        self.qoi_variables = self.problem_qoi.Variables.to_list()
+        self._extract_problem_data()
 
     def box_measure_volume(self, dv_box, fraction_useful=1.0):
         volume = np.prod(dv_box[:, 1] - dv_box[:, 0]) * fraction_useful
@@ -214,9 +213,7 @@ class XRayOpt:
             self.dv_box_init = dv_box_init
         else:
             self.logger.debug("No initial growth box provided, using midpoint")
-            self.dv_box_init = np.column_stack(
-                [((self.dv_u + self.dv_l) / 2).to_numpy().astype(np.float64)] * 2
-            )
+            self.dv_box_init = np.column_stack([(self.dv_u + self.dv_l) / 2] * 2)
         self.box_measure_init = self.box_measure_volume(self.dv_box_init)
         self.logger.debug(f"Initial box measure: {self.box_measure_init}")
 
@@ -338,6 +335,24 @@ class XRayOpt:
 
         return dv_box, box_measure_trimmed
 
+    def export_optimisation_result(self, dv_box):
+        dv_solution_space = pd.DataFrame(
+            {
+                "Variables": self.dv_variables,
+                "Lower": dv_box[:, 0],
+                "Upper": dv_box[:, 1],
+                "Units": self.problem_dv["Units"],
+                "Description": self.problem_dv["Description"],
+            }
+        )
+        dv_solution_space.to_csv(
+            self.problem_path + "/output/dv_solution_space.csv", index=False
+        )
+        logging.debug(
+            f"Exported DV solution space to {self.problem_path}/output/dv_solution_space.csv"
+        )
+        return dv_solution_space
+
 
 # Example usage
 
@@ -359,19 +374,5 @@ if __name__ == "__main__":
     dv_box, box_measure = ssOpt.run_sso_stochastic_iteration()
     print(f"Final box measure: {box_measure}")
     print(f"Final design variable box: {dv_box}")
-    # Export the final DV box to a CSV file
-    dv_solution_space = pd.DataFrame(
-        {
-            "Variables": ssOpt.dv_variables,
-            "Lower": dv_box[:, 0],
-            "Upper": dv_box[:, 1],
-            "Units": ssOpt.problem_dv["Units"],
-            "Description": ssOpt.problem_dv["Description"],
-        }
-    )
-    dv_solution_space.to_csv(
-        ssOpt.problem_path + "/output/dv_solution_space.csv", index=False
-    )
-    logging.debug(
-        f"Exported DV solution space to {ssOpt.problem_path}/output/dv_solution_space.csv"
-    )
+
+    ssOpt.export_optimisation_result(dv_box)

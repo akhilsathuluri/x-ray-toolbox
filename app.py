@@ -22,6 +22,7 @@ import numpy as np
 from src.description import *
 from src.toolviz.XRayViz import XRayViz
 from src.toolopt.XRayOpt import XRayOpt
+import logging
 
 # Initialise the tool class
 xray = XRayViz()
@@ -29,9 +30,9 @@ xray = XRayViz()
 # We can use the sessionID to decide if we want to
 # rerun the simulations or not
 sessionID = -1
-if 'sessionID' and 'prev_sessionID' not in st.session_state:
-    st.session_state['sessionID'] = sessionID
-    st.session_state['prev_sessionID'] = sessionID
+if "sessionID" and "prev_sessionID" not in st.session_state:
+    st.session_state["sessionID"] = sessionID
+    st.session_state["prev_sessionID"] = sessionID
     st.session_state.prev_sample_size = xray.sample_size
 
 sessionID = np.random.randint(11, 99999)
@@ -45,6 +46,35 @@ figs = xray.initiate_plots()
 
 # Plot the rectangles based on the sliders
 rect_figs = xray.update_rectangles(dv, figs)
+
+# add option to optimise
+# xray.optimisation_options()
+run_opt = st.sidebar.expander("Optimisation")
+with run_opt:
+    st.write("Runs stochastic iteration optimisation")
+    if st.button("Optimise"):
+        sso = XRayOpt(log_level=logging.DEBUG)
+        sso.growth_rate = 8e-2
+        sso.sample_size = 100
+        sso._get_problem_info_from_app(xray)
+        sso._set_initial_box()
+        dv_box, box_measure = sso.run_sso_stochastic_iteration()
+        st.write("Computed measure of the box: ", box_measure)
+        dv_sol_space = sso.export_optimisation_result(dv_box)
+        st.success("Optimisation completed successfully. Results exported.")
+        # Add information box about the optimization parameters
+        st.info(
+            f"""
+        **Optimization Algorithm Parameters:**
+        - Growth rate: {sso.growth_rate}
+        - Sample size: {sso.sample_size}
+        - Max exploration iterations: {sso.max_exploration_iterations}
+        - Max consolidation iterations: {sso.max_consolidation_iterations}
+        """
+        )
+        st.session_state["updated_dv"] = dv_sol_space
+        st.rerun()
+
 
 xray.export_options()
 scatter_figs = xray.scatter_plots(rect_figs)
