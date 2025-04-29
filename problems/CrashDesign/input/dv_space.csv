@@ -1,7 +1,7 @@
 Variables,Lower,Upper,Units,Description
-F_2,0,1000000,N,Force
+F_2,1e5,1e6,N,Force
 m,1500,2500,kg,Mass
-F_1,0,1000000,N,Force 
-v_0,0,100,m/s,Velocity
+F_1,1e5,1e6,N,Force 
+v_0,5,25,m/s,Velocity
 d_1c,0,0.6,m,
 d_2c,0,0.6,m,
