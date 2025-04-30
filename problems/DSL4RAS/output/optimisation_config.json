@@ -1,0 +1,9 @@
+{
+    "box_measure": 0.0,
+    "optimization_params": {
+        "growth_rate": 0.08,
+        "sample_size": 100,
+        "max_exploration_iterations": 20,
+        "max_consolidation_iterations": 20
+    }
+}

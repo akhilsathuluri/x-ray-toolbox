@@ -16,3 +16,20 @@ numpy = ">=2.2.5,<3"
 seaborn = ">=0.13.2,<0.14"
 ipykernel = ">=6.29.5,<7"
 joblib = ">=1.4.2,<2"
+
+[environments]
+dsl4ras = { features = ["dsl4ras"], solve-group = "default" }
+
+[feature.dsl4ras.pypi-dependencies]
+drake = ">=1.40.0, <2"
+amo-urdf = { git = "git+https://github.com/ami-iit/amo_urdf.git" }
+sak = { git = "git+https://github.com/akhilsathuluri/sak.git" }
+
+[feature.dsl4ras.system-requirements]
+libc = "2.35"
+
+[feature.dsl4ras.dependencies]
+tqdm = ">=4.67.1,<5"
+meshio = ">=5.3.5,<6"
+trimesh = ">=4.6.8,<5"
+urchin = ">=0.0.29,<0.0.30"

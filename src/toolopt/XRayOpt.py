@@ -283,14 +283,13 @@ class XRayOpt:
         return dv_box_trimmed, box_measure_trimmed, convergence_flag
 
     def run_sso_stochastic_iteration(self):
-        box_measure_trimmed = self.box_measure_init
-        dv_box = self.dv_box_init
+        box_measure_trimmed = self.box_measure_init.copy()
+        dv_box = self.dv_box_init.copy()
         total_iterations = (
             self.max_exploration_iterations + self.max_consolidation_iterations
         )
 
         for iteration in range(total_iterations):
-            # Determine which phase we're in
             is_exploration_phase = iteration < self.max_exploration_iterations
             phase_name = "Exploration" if is_exploration_phase else "Consolidation"
             phase_iteration = (
