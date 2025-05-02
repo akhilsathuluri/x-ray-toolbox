@@ -25,6 +25,7 @@ from src.toolopt.XRayOpt import XRayOpt
 import logging
 import json
 import os
+import pandas as pd
 
 # Initialise the tool class
 xray = XRayViz()
@@ -79,7 +80,7 @@ with run_opt:
     )
     init_box_type = st.selectbox(
         "Initial box type",
-        options=["domain", "midpoint", "random-bounds", "random-point"],
+        options=["domain", "midpoint", "random-bounds", "random-point", "previous-sol"],
         index=0,
     )
     use_adaptive_growth_rate = st.checkbox(
@@ -113,6 +114,23 @@ with run_opt:
                             random_upper_bound,
                         )
                     ).T
+                )
+            case "previous-sol":
+                csv_path = sso.problem_path + "/output/dv_solution_space.csv"
+                if not os.path.exists(csv_path):
+                    st.error(f"CSV file not found: {csv_path}")
+                    st.stop()
+                prev_sol = pd.read_csv(csv_path)
+                sso._set_initial_box(
+                    np.vstack(
+                        (
+                            prev_sol.Lower.values,
+                            prev_sol.Upper.values,
+                        )
+                    ).T
+                )
+                st.success(
+                    f"Initial box set to previous solution space from {csv_path}"
                 )
         sso.update_qoi_bounds(st.session_state["updated_qoi"])
         sso.use_adaptive_growth_rate = True

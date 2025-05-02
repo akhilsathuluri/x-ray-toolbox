@@ -246,6 +246,7 @@ class XRayViz:
                             ),
                             step=slider_step,
                             key="dv_slider" + str(i),
+                            format=f"%0.{int(np.abs(np.log10(slider_step)))}f"
                         )
                     )
 
@@ -253,6 +254,7 @@ class XRayViz:
             with qoi_expander:
                 # Make sliders available in the sidebar
                 for i in range(self.problem_qoi_size):
+                    slider_step = (self.problem_qoi.Upper[i] - self.problem_qoi.Lower[i]) / self.step_disc
                     (slider_qoi.loc[i, "Lower"], slider_qoi.loc[i, "Upper"]) = (
                         qoi_expander.slider(
                             self.problem_qoi.Variables[i],
@@ -262,9 +264,9 @@ class XRayViz:
                                 slider_qoi.Lower[i],
                                 slider_qoi.Upper[i],
                             ),
-                            step=(self.problem_qoi.Upper[i] - self.problem_qoi.Lower[i])
-                            / self.step_disc,
+                            step=slider_step,
                             key="qoi_slider" + str(i),
+                            format=f"%0.{int(np.abs(np.log10(slider_step)))}f"
                         )
                     )
 
