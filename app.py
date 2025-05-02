@@ -68,20 +68,20 @@ with run_opt:
         "Max exploration iterations",
         min_value=1,
         max_value=10000,
-        value=20,
+        value=10,
         step=1,
     )
     max_consolidation_iterations = st.number_input(
         "Max consolidation iterations",
         min_value=1,
         max_value=10000,
-        value=20,
+        value=10,
         step=1,
     )
     init_box_type = st.selectbox(
         "Initial box type",
         options=["domain", "midpoint", "random-bounds", "random-point", "previous-sol"],
-        index=0,
+        index=4,
     )
     use_adaptive_growth_rate = st.checkbox(
         "Use adaptive growth rate", value=False, key="adaptive_growth_rate"

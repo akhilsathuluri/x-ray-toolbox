@@ -1,10 +1,10 @@
 {
-    "box_measure": 764.940661300277,
+    "box_measure": 52.862146584097296,
     "optimization_params": {
-        "growth_rate": 6.89603744481577e-09,
-        "sample_size": 100,
-        "max_exploration_iterations": 20,
-        "max_consolidation_iterations": 20,
+        "growth_rate": 8.269737336458039e-06,
+        "sample_size": 200,
+        "max_exploration_iterations": 10,
+        "max_consolidation_iterations": 10,
         "use_adaptive_growth_rate": true,
         "init_box_type": "previous-sol",
         "seed": 42

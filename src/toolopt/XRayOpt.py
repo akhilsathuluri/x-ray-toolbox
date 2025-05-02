@@ -82,7 +82,9 @@ class XRayOpt:
 
     def compute_qoi_violation(self, qoi_evaluated):
         qoi_violation = np.zeros_like(qoi_evaluated)
-        normalisation_factor = 1.0
+        # normalisation_factor = 1.0
+        # TODO: Check the limits to ensure this is within bounds
+        normalisation_factor = self.qoi_u - self.qoi_l
         qoi_violation_l = (self.qoi_l - qoi_evaluated) / normalisation_factor
         qoi_violation_u = (qoi_evaluated - self.qoi_u) / normalisation_factor
         qoi_violation = np.maximum(qoi_violation_l, qoi_violation_u)

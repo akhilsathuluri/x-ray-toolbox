@@ -1,0 +1,5 @@
+Variables,Lower,Upper,Units,Description
+accuracy,0.0,0.0004968,m,error between realised and required position accuracy
+reach,0.25,0.9902,m,maximum reach of the robot
+robot_weight,0.0,70.2,kg,weight of the robot
+pose_stabilisation,0.0,0.532948,s,pose stabilisation time
