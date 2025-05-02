@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import logging
 from pathlib import Path
+import json
 
 # This is a standalone class that can be used just for solution space based optimisation independant of the x-ray visualisation tool
 # Implements the basic stochastic iteration code for SSO
@@ -26,6 +27,11 @@ class XRayOpt:
         self.slack: float = 0.0
         self.apply_leanness: bool = False
         self.sample_size: int = 100
+        self.target_accepted_ratio_exploration: float = 0.7
+        self.max_growth_rate: float = 0.2
+        self.min_growth_rate: float = 0.0
+        self.min_growth_rate_adaptation_factor: float = 0.2
+        self.max_growth_rate_adaptation_factor: float = 1.5
 
     def _extract_problem_data(self):
         self.dv_l = self.problem_dv.Lower.to_numpy().astype(np.float64)
@@ -224,9 +230,7 @@ class XRayOpt:
         working_box = dv_box
         if is_exploration:
             logging.debug("Growing candidate box")
-            working_box = self.dv_box_grow_fixed(
-                dv_box,
-            )
+            working_box = self.dv_box_grow_fixed(dv_box)
             logging.debug(f"DV box grown: {working_box}")
             logging.debug(f"Current growth rate is: {self.growth_rate}")
 
@@ -255,19 +259,22 @@ class XRayOpt:
             logging.debug("No feasible samples found, relax constraints and retry")
 
         # Calculate purity and box measure
-        purity = sum(feasible_mask) / sample_size
-        box_measure = self.box_measure_volume(working_box, fraction_useful=purity)
+        self.purity = sum(feasible_mask) / sample_size
+        self.purity = max(min(self.purity, self.max_purity), self.min_purity)
+        box_measure_grown = self.box_measure_volume(
+            working_box, fraction_useful=self.purity
+        )
 
         if is_exploration:
-            logging.debug(f"Purity: {purity}")
-            if sum(feasible_mask) == 0 or purity < self.min_purity:
+            logging.debug(f"Purity: {self.purity}")
+            if sum(feasible_mask) == 0 or self.purity < self.min_purity:
                 logging.debug("Purity is below the threshold, reducing growth rate")
 
         # Trim the box
         trimming_order = self.get_trimming_order(qoi_score)
         dv_box_trimmed, box_measure_trimmed, convergence_flag = self.get_trimmed_box(
             working_box,
-            box_measure,
+            box_measure_grown,
             dv_samples[self.problem_dv.Variables].to_numpy().astype(np.float64),
             feasible_mask,
             trimming_order,
@@ -277,10 +284,27 @@ class XRayOpt:
 
         # Apply leanness if requested
         if self.apply_leanness:
-            # TODO: Need to add this
-            pass
+            raise NotImplementedError("Leanness is not implemented yet")
 
-        return dv_box_trimmed, box_measure_trimmed, convergence_flag
+        return (
+            dv_box_trimmed,
+            box_measure_trimmed,
+            box_measure_grown,
+            convergence_flag,
+        )
+
+    def get_growth_adaptation_factor(
+        self, purity, measure_increase_fraction_acceptable
+    ):
+        growth_exponent = (
+            self.problem_dv_size
+            - (self.problem_dv_size - 1) * measure_increase_fraction_acceptable
+        )
+        target_purity = self.target_accepted_ratio_exploration
+        growth_adaptation_factor = ((1 - target_purity) * purity) / (
+            (1 - purity) * target_purity
+        ) ** (1 / growth_exponent)
+        return growth_adaptation_factor
 
     def run_sso_stochastic_iteration(self):
         box_measure_trimmed = self.box_measure_init.copy()
@@ -298,22 +322,48 @@ class XRayOpt:
                 else iteration - self.max_exploration_iterations
             )
 
-            logging.debug(f"{phase_name} iteration {phase_iteration}")
+            # logging.debug(f"{phase_name} iteration {phase_iteration}")
+            print(f"{phase_name}: iteration {phase_iteration}")
 
             if is_exploration_phase and iteration > 1 and self.use_adaptive_growth_rate:
-                raise NotImplementedError("Adaptive growth rate is not implemented yet")
+                self.purity = max(min(self.purity, self.max_purity), self.min_purity)
+                measure_increase = self.box_measure_grown - self.box_measure_prev
+                measure_increase_accpetable = max(
+                    self.box_measure_grown * self.purity - self.box_measure_prev, 0
+                )
+                measure_increase_fraction_acceptable = (
+                    measure_increase_accpetable / measure_increase
+                )
+                growth_adaptation_factor = np.clip(
+                    self.get_growth_adaptation_factor(
+                        self.purity, measure_increase_fraction_acceptable
+                    ),
+                    self.min_growth_rate_adaptation_factor,
+                    self.max_growth_rate_adaptation_factor,
+                )
+                self.growth_rate = np.clip(
+                    self.growth_rate * growth_adaptation_factor,
+                    self.min_growth_rate,
+                    self.max_growth_rate,
+                )
+                logging.debug(
+                    f"Growth rate adapted to: {self.growth_rate} with factor: {growth_adaptation_factor}"
+                )
 
             if is_exploration_phase:
                 logging.debug(
                     f"Iteration {phase_iteration} - Box measure: {box_measure_trimmed}"
                 )
-
+            self.box_measure_prev = box_measure_trimmed
             # Evaluate and trim the box
-            dv_box, box_measure_trimmed, convergence_flag = self.evaluate_and_trim_box(
-                dv_box,
-                self.sample_size,
-                is_exploration=is_exploration_phase,
+            dv_box, box_measure_trimmed, box_measure_grown, convergence_flag = (
+                self.evaluate_and_trim_box(
+                    dv_box,
+                    self.sample_size,
+                    is_exploration=is_exploration_phase,
+                )
             )
+            self.box_measure_grown = box_measure_grown
             if convergence_flag:
                 logging.debug(
                     f"Convergence achieved at iteration {iteration} with box measure: {box_measure_trimmed}"
@@ -352,6 +402,12 @@ class XRayOpt:
         )
         logging.debug(
             f"Exported DV solution space to {self.problem_path}/output/dv_solution_space.csv"
+        )
+        plot_data = {"sample_size": self.sample_size}
+        with open(self.problem_path + "/output/plot_data.json", "w") as f:
+            json.dump(plot_data, f)
+        logging.debug(
+            f"Exported plot data to {self.problem_path}/output/plot_data.json"
         )
         return dv_solution_space
 

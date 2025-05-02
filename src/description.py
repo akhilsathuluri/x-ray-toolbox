@@ -1,8 +1,8 @@
 # This file contains all the text to populate the main page
 
-help_text = '''
+help_text = """
             # Help
-            ## New in v0.0.3a:\n
+            ## New in v0.1:\n
                 1. Modularised code for ease of understanding and usage
                 2. The most awaited "Update" button for the DV and QoI sliders
                 3. Add images like ADGs or system diagrams by dragging and dropping them into the tool
@@ -56,4 +56,4 @@ help_text = '''
                 2. Move the sliders under the "Design variables" expander until your design space contains only feasible designs (green dots)
             #### Visualise the solution:
                 1. If you do not want to try it yourself, you can load the existing solution by selecting the "Load solution" check box
-            '''
+            """

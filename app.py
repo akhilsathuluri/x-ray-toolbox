@@ -54,14 +54,70 @@ rect_figs = xray.update_rectangles(dv, figs)
 run_opt = st.sidebar.expander("Optimisation")
 with run_opt:
     st.write("Runs stochastic iteration optimisation")
+    seed = st.number_input(
+        "Random seed", min_value=1, max_value=10000, value=42, step=1
+    )
+    growth_rate = st.number_input(
+        "Growth rate", min_value=0.0, max_value=1.0, value=0.08, step=1e-2
+    )
+    sample_size = st.number_input(
+        "Sample Size", min_value=1, max_value=10000, value=100, step=1
+    )
+    max_exploration_iterations = st.number_input(
+        "Max exploration iterations",
+        min_value=1,
+        max_value=10000,
+        value=20,
+        step=1,
+    )
+    max_consolidation_iterations = st.number_input(
+        "Max consolidation iterations",
+        min_value=1,
+        max_value=10000,
+        value=20,
+        step=1,
+    )
+    init_box_type = st.selectbox(
+        "Initial box type",
+        options=["domain", "midpoint", "random-bounds", "random-point"],
+        index=0,
+    )
+    use_adaptive_growth_rate = st.checkbox(
+        "Use adaptive growth rate", value=False, key="adaptive_growth_rate"
+    )
     if st.button("Optimise"):
-        sso = XRayOpt(log_level=logging.DEBUG)
-        sso.growth_rate = 8e-2
-        sso.sample_size = 100
+        sso = XRayOpt(seed=seed, log_level=logging.CRITICAL)
+        # sso.growth_rate = 8e-2
+        # sso.sample_size = 100
+        sso.growth_rate = growth_rate
+        sso.sample_size = sample_size
+        sso.use_adaptive_growth_rate = use_adaptive_growth_rate
+        sso.max_exploration_iterations = max_exploration_iterations
+        sso.max_consolidation_iterations = max_consolidation_iterations
         sso._get_problem_info_from_app(xray)
-        sso._set_initial_box()
+        match init_box_type:
+            case "domain":
+                sso._set_initial_box(np.vstack((sso.dv_l, sso.dv_u)).T)
+            case "midpoint":
+                sso._set_initial_box()
+            case "random-point":
+                random_point = sso.rng.uniform(sso.dv_l, sso.dv_u)
+                sso._set_initial_box(np.vstack((random_point, random_point)).T)
+            case "random-bounds":
+                random_lower_bound = sso.rng.uniform(sso.dv_l, sso.dv_u)
+                random_upper_bound = sso.rng.uniform(random_lower_bound, sso.dv_u)
+                sso._set_initial_box(
+                    np.vstack(
+                        (
+                            random_lower_bound,
+                            random_upper_bound,
+                        )
+                    ).T
+                )
         sso.update_qoi_bounds(st.session_state["updated_qoi"])
-        dv_box, box_measure = sso.run_sso_stochastic_iteration()
+        sso.use_adaptive_growth_rate = True
+        with st.spinner("Running stochastic iteration optimisation...", show_time=True):
+            dv_box, box_measure = sso.run_sso_stochastic_iteration()
         dv_sol_space = sso.export_optimisation_result(dv_box)
         st.session_state["updated_dv"] = dv_sol_space
         result_outpath = xray.problem_path + "/output"
@@ -73,6 +129,9 @@ with run_opt:
                 "sample_size": int(sso.sample_size),
                 "max_exploration_iterations": int(sso.max_exploration_iterations),
                 "max_consolidation_iterations": int(sso.max_consolidation_iterations),
+                "use_adaptive_growth_rate": bool(sso.use_adaptive_growth_rate),
+                "init_box_type": str(init_box_type),
+                "seed": int(seed),
             },
         }
         with open(xray.problem_path + "/output/optimisation_config.json", "w") as f:
@@ -83,7 +142,8 @@ with run_opt:
         )
 
 xray.export_options()
-scatter_figs = xray.scatter_plots(rect_figs)
+with st.spinner("Running simulations...", show_time=True):
+    scatter_figs = xray.scatter_plots(rect_figs)
 st.session_state.figs = scatter_figs
 
 final_figs = xray.overlay_info(scatter_figs)
