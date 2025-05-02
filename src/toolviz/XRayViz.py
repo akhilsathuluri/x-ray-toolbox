@@ -272,7 +272,7 @@ class XRayViz:
                             ),
                             step=slider_step,
                             key="qoi_slider" + str(i),
-                            format=f"%0.{int(np.abs(np.log10(slider_step)))}f"
+                            format=f"%0.{1+int(np.abs(np.log10(slider_step)))}f"
                         )
                     )
 

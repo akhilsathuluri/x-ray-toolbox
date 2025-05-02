@@ -64,6 +64,9 @@ with run_opt:
     sample_size = st.number_input(
         "Sample Size", min_value=1, max_value=10000, value=100, step=1
     )
+    slack = st.number_input(
+        "Slack", min_value=0.0, max_value=0.9, value=0.0, step=0.01
+    )
     max_exploration_iterations = st.number_input(
         "Max exploration iterations",
         min_value=1,
@@ -88,10 +91,9 @@ with run_opt:
     )
     if st.button("Optimise"):
         sso = XRayOpt(seed=seed, log_level=logging.CRITICAL)
-        # sso.growth_rate = 8e-2
-        # sso.sample_size = 100
         sso.growth_rate = growth_rate
         sso.sample_size = sample_size
+        sso.slack = slack
         sso.use_adaptive_growth_rate = use_adaptive_growth_rate
         sso.max_exploration_iterations = max_exploration_iterations
         sso.max_consolidation_iterations = max_consolidation_iterations
