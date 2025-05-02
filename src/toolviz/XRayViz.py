@@ -37,8 +37,8 @@ class XRayViz:
         # ######################## Page configuration ################################
         # ############################################################################
         # Declare application name and version
-        version = "v0.0.3a"
-        name = "X-Ray Tool G7 "
+        version = "v0.1a"
+        name = "X-Ray Tool G7"
         st.set_page_config(
             layout="wide", page_title=name + version, page_icon=":flashlight:"
         )
@@ -91,6 +91,12 @@ class XRayViz:
                 step=self.sample_size_step,
                 value=self.sol_sample_size,
             )
+            self.is_pfd = problem_config.checkbox(
+                "PFD", value=False, key="is_pfd"
+            )
+            if self.is_pfd:
+                st.success("Absolutely nothing will happen")
+                st.stop()
             self.rerun_button = st.sidebar.button("Rerun")
 
         ############################################################################
