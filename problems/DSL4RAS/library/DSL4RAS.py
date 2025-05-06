@@ -34,7 +34,9 @@ class DSL4RAS:
         var_list = self.var.values.tolist()
         self.qoi_values = np.array(
             Parallel(n_jobs=-1)(
-                delayed(self.sim_system.evaluate_qois)(var) for var in var_list
+                # delayed(self.sim_system.evaluate_qois)(var) for var in var_list
+                delayed(self.sim_system.evaluate_qois_MPC)(var)
+                for var in var_list
             )
         )
 

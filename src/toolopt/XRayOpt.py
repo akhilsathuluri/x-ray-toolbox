@@ -323,7 +323,9 @@ class XRayOpt:
             )
 
             # logging.debug(f"{phase_name} iteration {phase_iteration}")
-            print(f"{phase_name}: iteration {phase_iteration}")
+            print(
+                f"{phase_name}: iteration {phase_iteration}, box measure: {self.box_measure_prev}"
+            )
 
             if is_exploration_phase and iteration > 1 and self.use_adaptive_growth_rate:
                 self.purity = max(min(self.purity, self.max_purity), self.min_purity)
