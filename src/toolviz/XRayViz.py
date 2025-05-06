@@ -37,8 +37,8 @@ class XRayViz:
         # ######################## Page configuration ################################
         # ############################################################################
         # Declare application name and version
-        version = "v0.0.3a"
-        name = "X-Ray Tool G7 "
+        version = "v0.1a"
+        name = "X-Ray Tool G7"
         st.set_page_config(
             layout="wide", page_title=name + version, page_icon=":flashlight:"
         )
@@ -91,6 +91,12 @@ class XRayViz:
                 step=self.sample_size_step,
                 value=self.sol_sample_size,
             )
+            self.is_pfd = problem_config.checkbox(
+                "PFD", value=False, key="is_pfd"
+            )
+            if self.is_pfd:
+                st.success("Absolutely nothing will happen")
+                st.stop()
             self.rerun_button = st.sidebar.button("Rerun")
 
         ############################################################################
@@ -246,6 +252,7 @@ class XRayViz:
                             ),
                             step=slider_step,
                             key="dv_slider" + str(i),
+                            format=f"%0.{int(np.abs(np.log10(slider_step)))}f"
                         )
                     )
 
@@ -253,6 +260,7 @@ class XRayViz:
             with qoi_expander:
                 # Make sliders available in the sidebar
                 for i in range(self.problem_qoi_size):
+                    slider_step = (self.problem_qoi.Upper[i] - self.problem_qoi.Lower[i]) / self.step_disc
                     (slider_qoi.loc[i, "Lower"], slider_qoi.loc[i, "Upper"]) = (
                         qoi_expander.slider(
                             self.problem_qoi.Variables[i],
@@ -262,9 +270,9 @@ class XRayViz:
                                 slider_qoi.Lower[i],
                                 slider_qoi.Upper[i],
                             ),
-                            step=(self.problem_qoi.Upper[i] - self.problem_qoi.Lower[i])
-                            / self.step_disc,
+                            step=slider_step,
                             key="qoi_slider" + str(i),
+                            format=f"%0.{1+int(np.abs(np.log10(slider_step)))}f"
                         )
                     )
 

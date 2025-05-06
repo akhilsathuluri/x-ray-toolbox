@@ -82,7 +82,9 @@ class XRayOpt:
 
     def compute_qoi_violation(self, qoi_evaluated):
         qoi_violation = np.zeros_like(qoi_evaluated)
-        normalisation_factor = 1.0
+        # normalisation_factor = 1.0
+        # TODO: Check the limits to ensure this is within bounds
+        normalisation_factor = (self.qoi_u - self.qoi_l)*10
         qoi_violation_l = (self.qoi_l - qoi_evaluated) / normalisation_factor
         qoi_violation_u = (qoi_evaluated - self.qoi_u) / normalisation_factor
         qoi_violation = np.maximum(qoi_violation_l, qoi_violation_u)
@@ -324,7 +326,11 @@ class XRayOpt:
 
             # logging.debug(f"{phase_name} iteration {phase_iteration}")
             print(
+<<<<<<< HEAD
                 f"{phase_name}: iteration {phase_iteration}, box measure: {self.box_measure_prev}"
+=======
+                f"{phase_name}: iteration {phase_iteration}, box measure: {box_measure_trimmed}"
+>>>>>>> 1b6fd46095890967f7301d70949e4d26cf29a704
             )
 
             if is_exploration_phase and iteration > 1 and self.use_adaptive_growth_rate:

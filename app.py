@@ -25,6 +25,7 @@ from src.toolopt.XRayOpt import XRayOpt
 import logging
 import json
 import os
+import pandas as pd
 
 # Initialise the tool class
 xray = XRayViz()
@@ -63,34 +64,36 @@ with run_opt:
     sample_size = st.number_input(
         "Sample Size", min_value=1, max_value=10000, value=100, step=1
     )
+    slack = st.number_input(
+        "Slack", min_value=0.0, max_value=0.9, value=0.0, step=0.01
+    )
     max_exploration_iterations = st.number_input(
         "Max exploration iterations",
         min_value=1,
         max_value=10000,
-        value=20,
+        value=10,
         step=1,
     )
     max_consolidation_iterations = st.number_input(
         "Max consolidation iterations",
         min_value=1,
         max_value=10000,
-        value=20,
+        value=10,
         step=1,
     )
     init_box_type = st.selectbox(
         "Initial box type",
-        options=["domain", "midpoint", "random-bounds", "random-point"],
-        index=0,
+        options=["domain", "midpoint", "random-bounds", "random-point", "previous-sol"],
+        index=4,
     )
     use_adaptive_growth_rate = st.checkbox(
         "Use adaptive growth rate", value=False, key="adaptive_growth_rate"
     )
     if st.button("Optimise"):
         sso = XRayOpt(seed=seed, log_level=logging.CRITICAL)
-        # sso.growth_rate = 8e-2
-        # sso.sample_size = 100
         sso.growth_rate = growth_rate
         sso.sample_size = sample_size
+        sso.slack = slack
         sso.use_adaptive_growth_rate = use_adaptive_growth_rate
         sso.max_exploration_iterations = max_exploration_iterations
         sso.max_consolidation_iterations = max_consolidation_iterations
@@ -113,6 +116,23 @@ with run_opt:
                             random_upper_bound,
                         )
                     ).T
+                )
+            case "previous-sol":
+                csv_path = sso.problem_path + "/output/dv_solution_space.csv"
+                if not os.path.exists(csv_path):
+                    st.error(f"CSV file not found: {csv_path}")
+                    st.stop()
+                prev_sol = pd.read_csv(csv_path)
+                sso._set_initial_box(
+                    np.vstack(
+                        (
+                            prev_sol.Lower.values,
+                            prev_sol.Upper.values,
+                        )
+                    ).T
+                )
+                st.success(
+                    f"Initial box set to previous solution space from {csv_path}"
                 )
         sso.update_qoi_bounds(st.session_state["updated_qoi"])
         sso.use_adaptive_growth_rate = True
