@@ -9,3 +9,5 @@ eta_t,0.25,1,-,transmission efficiency
 phi_b,0,20,arcmin,gearbox backlash
 l1, 0.1,0.6,m,link length 1
 l2, 0.1,0.6,m,link length 2
+kp,50,250,-,proportional gain
+kd,10,40,-,derivative gain

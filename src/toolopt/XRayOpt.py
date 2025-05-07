@@ -326,11 +326,7 @@ class XRayOpt:
 
             # logging.debug(f"{phase_name} iteration {phase_iteration}")
             print(
-<<<<<<< HEAD
-                f"{phase_name}: iteration {phase_iteration}, box measure: {self.box_measure_prev}"
-=======
                 f"{phase_name}: iteration {phase_iteration}, box measure: {box_measure_trimmed}"
->>>>>>> 1b6fd46095890967f7301d70949e4d26cf29a704
             )
 
             if is_exploration_phase and iteration > 1 and self.use_adaptive_growth_rate:

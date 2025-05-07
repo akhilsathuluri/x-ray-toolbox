@@ -25,7 +25,7 @@ class DSL4RAS:
                 [6, 2],
                 [6, 8],
                 [7, 5],
-                [10,11],
+                # [10,11],
             ]
         )
         self.sim_system = ScaraSystem()
