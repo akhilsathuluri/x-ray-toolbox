@@ -83,7 +83,7 @@ with run_opt:
     )
     init_box_type = st.selectbox(
         "Initial box type",
-        options=["domain", "midpoint", "random-bounds", "random-point", "previous-sol"],
+        options=["domain", "midpoint", "random-bounds", "random-point", "previous-sol", "dv-box"],
         index=4,
     )
     use_adaptive_growth_rate = st.checkbox(
@@ -123,16 +123,28 @@ with run_opt:
                     st.error(f"CSV file not found: {csv_path}")
                     st.stop()
                 prev_sol = pd.read_csv(csv_path)
-                sso._set_initial_box(
-                    np.vstack(
+                init_box = np.vstack(
                         (
                             prev_sol.Lower.values,
                             prev_sol.Upper.values,
                         )
                     ).T
-                )
+                sso._set_initial_box(init_box)
+            case "dv-box":                
+                if "updated_dv" in st.session_state:
+                    print("updated_dv found in session state")
+                    dv_box = st.session_state["updated_dv"]   
+                    init_box = np.vstack((
+                            dv_box.Lower.values,
+                            dv_box.Upper.values,)
+                        ).T
+                    sso._set_initial_box(init_box)
+                    # st.write(init_box.shape)
+                else:
+                    st.error("No updated design variable box found in session state. Try rerun")
+                    st.stop()
                 st.success(
-                    f"Initial box set to previous solution space from {csv_path}"
+                    f"Initial box set to current dv box"
                 )
         sso.update_qoi_bounds(st.session_state["updated_qoi"])
         sso.use_adaptive_growth_rate = True
@@ -165,6 +177,9 @@ xray.export_options()
 with st.spinner("Running simulations...", show_time=True):
     scatter_figs = xray.scatter_plots(rect_figs)
 st.session_state.figs = scatter_figs
+
+# if the data is needed to troubleshoot
+# st.write(xray.prob.var)
 
 final_figs = xray.overlay_info(scatter_figs)
 xray.plot_figs(final_figs)

@@ -261,20 +261,24 @@ class XRayViz:
                 # Make sliders available in the sidebar
                 for i in range(self.problem_qoi_size):
                     slider_step = (self.problem_qoi.Upper[i] - self.problem_qoi.Lower[i]) / self.step_disc
-                    (slider_qoi.loc[i, "Lower"], slider_qoi.loc[i, "Upper"]) = (
-                        qoi_expander.slider(
-                            self.problem_qoi.Variables[i],
-                            min_value=self.problem_qoi.Lower[i],
-                            max_value=self.problem_qoi.Upper[i],
-                            value=(
-                                slider_qoi.Lower[i],
-                                slider_qoi.Upper[i],
-                            ),
-                            step=slider_step,
-                            key="qoi_slider" + str(i),
-                            format=f"%0.{1+int(np.abs(np.log10(slider_step)))}f"
+                    if slider_step != 0:
+                        (slider_qoi.loc[i, "Lower"], slider_qoi.loc[i, "Upper"]) = (
+                            qoi_expander.slider(
+                                self.problem_qoi.Variables[i],
+                                min_value=self.problem_qoi.Lower[i],
+                                max_value=self.problem_qoi.Upper[i],
+                                value=(
+                                    slider_qoi.Lower[i],
+                                    slider_qoi.Upper[i],
+                                ),
+                                step=slider_step,
+                                key="qoi_slider" + str(i),
+                                format=f"%0.{1+int(np.abs(np.log10(slider_step)))}f"
+                            )
                         )
-                    )
+                    else:
+                        st.write(self.problem_qoi.Variables[i])
+                        st.write(slider_qoi.loc[i, "Lower"])
 
             # Since nominal is above the sliders, save step in session state
             if "slider_steps" not in st.session_state:
