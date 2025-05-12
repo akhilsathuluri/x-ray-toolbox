@@ -11,20 +11,20 @@ sys.path.append(
 from SCARA_bottom_up_mappings import ScaraSystem
 
 
-class DSL4RAS:
+class DSL4RASID:
     def __init__(self):
         self.problem_name = "DSL4RAS"
         self.problem_description = "SCARA robot example for a pick and place problem"
         self.plotter = np.array(
             [
                 [0, 5],
-                [1, 8],
-                [2, 9],
-                [3, 7],
-                [5, 9],
-                [6, 2],
-                [6, 8],
-                [7, 5],
+                # [1, 8],
+                # [2, 9],
+                # [3, 7],
+                # [5, 9],
+                # [6, 2],
+                # [6, 8],
+                # [7, 5],
                 # [10,11],
             ]
         )
@@ -35,10 +35,12 @@ class DSL4RAS:
         var_list = self.var.values.tolist()
         self.qoi_values = np.array(
             Parallel(n_jobs=-1)(
-                delayed(self.sim_system.evaluate_qois_MPC)(var)
+                delayed(self.sim_system.evaluate_qois)(var) for var in var_list
                 for var in var_list
             )
         )
+        print(len(self.qoi_values))
+        print(self.qoi_values)
 
     def accuracy(self):
         self.var["accuracy"] = self.qoi_values[:, 0]

@@ -22,10 +22,9 @@ class CollisionFree:
                 [0, 1],
                 [2, 3],
                 [4, 5],
-                [6, 7],
             ]
         )
-        num_robots = 4
+        num_robots = 3
         self.sim_system = ScaraSystem(num_robots=num_robots)
         nominalDV = np.array([0.8, 1.5, 1000, 0.9, 650, 160, 0.9, 10, 0.39, 0.26])
         dvs = np.tile(nominalDV, (num_robots, 1))
@@ -33,13 +32,7 @@ class CollisionFree:
 
     def _compute_commons(self, dv_samples):
         self.var = dv_samples
-        # compute collision for the chosen angles
         var_list = self.var.values.tolist()
-        # self.qoi_values = np.array(
-        #     Parallel(n_jobs=-1)(
-        #         delayed(self.sim_system.compute_collision_in_config)(var) for var in var_list
-        #     ),
-        #     dtype=int)
         self.qoi_values = []
         for var in var_list:
             qoi = self.sim_system.compute_collision_in_config(var)
