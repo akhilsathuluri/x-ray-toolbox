@@ -22,11 +22,15 @@ class CollisionFree:
                 [0, 1],
                 [2, 3],
                 [4, 5],
+                [6, 7],
+                [8, 9],
+                [10, 11],
             ]
         )
-        num_robots = 3
+        num_robots = 2
+        num_positions = 6
         self.sim_system = ScaraSystem(num_robots=num_robots)
-        nominalDV = np.array([0.8, 1.5, 1000, 0.9, 650, 160, 0.9, 10, 0.39, 0.26])
+        nominalDV = np.array([0]*num_robots*num_positions)
         dvs = np.tile(nominalDV, (num_robots, 1))
         self.sim_system.setup_robots_scene(dvs=dvs, modify_urdf=False)    
 
