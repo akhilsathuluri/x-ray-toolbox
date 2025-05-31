@@ -356,6 +356,9 @@ class XRayOpt:
         )
         return dv_solution_space
 
+    def component_spaces(self):
+        pass
+
 
 # Example usage
 
