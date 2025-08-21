@@ -1,8 +1,8 @@
 {
-    "box_measure": 3699.5759481466343,
+    "box_measure": 629.7950157746507,
     "optimization_params": {
-        "growth_rate": 0.006169173623574152,
-        "sample_size": 1000,
+        "growth_rate": 0.0030235181509552307,
+        "sample_size": 100,
         "max_exploration_iterations": 5,
         "max_consolidation_iterations": 5,
         "use_adaptive_growth_rate": true,
