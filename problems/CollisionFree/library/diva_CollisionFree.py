@@ -4,18 +4,18 @@ import sys
 from pathlib import Path
 
 sys.path.append(
-    (Path(__file__).parent.parent.parent.parent.parent / "xarm_cfree/src")
+    (Path(__file__).parent.parent.parent.parent.parent / "DIVA-R1.1.4-integrated")
     .resolve()
     .__str__()
 )
-from xarm_cfree import xArmCFreeSystem, xArmRobotsConfig
+from diva_collision_free import DIVAR114IntSystem
 
 
 class CollisionFree:
     def __init__(self):
         self.problem_name = "CollisionFree"
         self.problem_description = (
-            "Problem to decompose collision free workspace of the xarm robots"
+            "Problem to decompose collision free workspace of a scara robot"
         )
         self.plotter = np.array(
             [
@@ -24,21 +24,18 @@ class CollisionFree:
                 [4, 5],
                 [6, 7],
                 [8, 9],
-                [10, 11],
             ]
         )
-        robot_config = xArmRobotsConfig()
-        robot_config.use_meshcat = False
-        self.xArm_scene = xArmCFreeSystem(robotConfig=robot_config)
-        self.xArm_scene.setup_robots_scene()
+        self.sim_system = DIVAR114IntSystem()
+        self.sim_system.setup_robots_scene()
 
     def _compute_commons(self, dv_samples):
         self.var = dv_samples
         var_list = self.var.values.tolist()
         self.qoi_values = []
         for var in var_list:
-            flag, _ = self.xArm_scene.compute_collisions_for_pose(var)
-            self.qoi_values.append(flag)
+            qoi = self.sim_system.compute_collision_in_config(var)
+            self.qoi_values.append(qoi)
         self.qoi_values = np.array(self.qoi_values, dtype=int)
 
     def d_min(self):

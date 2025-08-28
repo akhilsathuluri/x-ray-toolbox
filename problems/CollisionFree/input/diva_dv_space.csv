@@ -1,0 +1,11 @@
+Variables,Lower,Upper,Units,Description
+theta1,-1.57,1.57,rad,Angle
+theta2,0.0,3.14,rad,Angle
+theta3,0.0,3.14,rad,Angle
+theta4,-3.14,3.14,rad,Angle
+theta5,-3.14,3.14,rad,Angle
+theta6,0.0,3.14,rad,Angle
+theta7,-3.14,-1.57,rad,Angle
+theta8,-1.57,1.57,rad,Angle
+theta9,-3.14,3.14,rad,Angle
+theta10,-3.14,3.14,rad,Angle
